@@ -1,6 +1,8 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useEffect } from "react";
+import { useFormContext, Controller } from "react-hook-form";
+import { differenceInCalendarDays, parse, isValid } from "date-fns";
 import {
   Card,
   CardContent,
@@ -19,11 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { ClientFormValues } from "@/schemas/client-form";
-import {
-  EMPLOYMENT_TYPES,
-  TRIP_FUNDED_BY_OPTIONS,
-} from "@/types";
+import { EMPLOYMENT_TYPES, TRIP_FUNDED_BY_OPTIONS } from "@/types";
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
 function Field({
   name,
@@ -31,12 +35,14 @@ function Field({
   type = "text",
   placeholder,
   hint,
+  readOnly,
 }: {
   name: keyof ClientFormValues;
   label: string;
   type?: string;
   placeholder?: string;
   hint?: string;
+  readOnly?: boolean;
 }) {
   const {
     register,
@@ -52,6 +58,8 @@ function Field({
         id={name}
         type={type}
         placeholder={placeholder}
+        readOnly={readOnly}
+        className={readOnly ? "bg-muted/50 cursor-default" : ""}
         {...register(name)}
       />
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
@@ -83,11 +91,7 @@ function TextAreaField({
   return (
     <div className="space-y-2">
       <Label htmlFor={name}>{label}</Label>
-      <Textarea
-        id={name}
-        placeholder={placeholder}
-        {...register(name)}
-      />
+      <Textarea id={name} placeholder={placeholder} {...register(name)} />
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
       {error?.message ? (
         <p className="text-xs text-destructive">{String(error.message)}</p>
@@ -127,9 +131,64 @@ function SwitchField({
   );
 }
 
+/** A date picker field wired to react-hook-form via Controller */
+function DateField({
+  name,
+  label,
+  hint,
+}: {
+  name: keyof ClientFormValues;
+  label: string;
+  hint?: string;
+}) {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext<ClientFormValues>();
+
+  const error = errors[name];
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={name}>{label}</Label>
+      <Controller
+        control={control}
+        name={name}
+        render={({ field }) => (
+          <DatePicker
+            id={name}
+            value={field.value as string}
+            onChange={field.onChange}
+          />
+        )}
+      />
+      {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+      {error?.message ? (
+        <p className="text-xs text-destructive">{String(error.message)}</p>
+      ) : null}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Auto-calculate travel duration
+// ---------------------------------------------------------------------------
+
+function calcDuration(startStr: string, endStr: string): string {
+  if (!startStr || !endStr) return "";
+  const start = parse(startStr, "yyyy-MM-dd", new Date());
+  const end = parse(endStr, "yyyy-MM-dd", new Date());
+  if (!isValid(start) || !isValid(end) || end < start) return "";
+  const days = differenceInCalendarDays(end, start) + 1;
+  return days === 1 ? "1 day" : `${days} days`;
+}
+
+// ---------------------------------------------------------------------------
+// Main form
+// ---------------------------------------------------------------------------
+
 export function ClientInfoForm() {
   const {
-    register,
     setValue,
     watch,
     formState: { errors },
@@ -139,9 +198,18 @@ export function ClientInfoForm() {
   const employmentType = watch("employmentType");
   const tripFundedBy = watch("tripFundedBy");
   const previousVisaRefusals = watch("previousVisaRefusals");
+  const travelStartDate = watch("travelStartDate");
+  const travelEndDate = watch("travelEndDate");
+
+  // Auto-calculate duration whenever travel dates change
+  useEffect(() => {
+    const calculated = calcDuration(travelStartDate ?? "", travelEndDate ?? "");
+    setValue("duration", calculated, { shouldDirty: false });
+  }, [travelStartDate, travelEndDate, setValue]);
 
   return (
     <div className="space-y-6">
+      {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
           <CardTitle>Personal Information</CardTitle>
@@ -161,7 +229,7 @@ export function ClientInfoForm() {
             label="Nationality"
             placeholder="United States"
           />
-          <Field name="dateOfBirth" label="Date of Birth" type="date" />
+          <DateField name="dateOfBirth" label="Date of Birth" />
           <Field
             name="email"
             label="Email Address"
@@ -179,16 +247,8 @@ export function ClientInfoForm() {
             label="City of Residence"
             placeholder="New York"
           />
-          <Field
-            name="passportIssueDate"
-            label="Passport Issue Date"
-            type="date"
-          />
-          <Field
-            name="passportExpiryDate"
-            label="Passport Expiry Date"
-            type="date"
-          />
+          <DateField name="passportIssueDate" label="Passport Issue Date" />
+          <DateField name="passportExpiryDate" label="Passport Expiry Date" />
           <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="maritalStatus">Marital Status</Label>
             <Select
@@ -221,6 +281,7 @@ export function ClientInfoForm() {
         </CardContent>
       </Card>
 
+      {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
           <CardTitle>Travel Information</CardTitle>
@@ -254,9 +315,17 @@ export function ClientInfoForm() {
             label="Number of Entries"
             placeholder="Single / Multiple"
           />
-          <Field name="duration" label="Duration" placeholder="10 days" />
-          <Field name="travelStartDate" label="Travel Start Date" type="date" />
-          <Field name="travelEndDate" label="Travel End Date" type="date" />
+          <DateField name="travelStartDate" label="Travel Start Date" />
+          <DateField name="travelEndDate" label="Travel End Date" />
+
+          {/* Auto-calculated duration */}
+          <Field
+            name="duration"
+            label="Duration (auto-calculated)"
+            readOnly
+            hint="Calculated automatically from the travel dates above."
+          />
+
           <Field
             name="hostName"
             label="Host / Inviting Organization"
@@ -278,6 +347,7 @@ export function ClientInfoForm() {
         </CardContent>
       </Card>
 
+      {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
           <CardTitle>Employment Information</CardTitle>
@@ -331,14 +401,11 @@ export function ClientInfoForm() {
             label="Annual Income"
             placeholder="USD 60,000"
           />
-          <Field
-            name="employmentStartDate"
-            label="Employment Start Date"
-            type="date"
-          />
+          <DateField name="employmentStartDate" label="Employment Start Date" />
         </CardContent>
       </Card>
 
+      {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
           <CardTitle>Financial Information</CardTitle>
@@ -387,12 +454,11 @@ export function ClientInfoForm() {
         </CardContent>
       </Card>
 
+      {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
           <CardTitle>Travel History</CardTitle>
-          <CardDescription>
-            Optional — past travel and visa record.
-          </CardDescription>
+          <CardDescription>Optional — past travel and visa record.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <SwitchField
@@ -420,12 +486,13 @@ export function ClientInfoForm() {
               name="previousVisaRefusalDetails"
               label="Refusal Details"
               placeholder="Country, year, and brief context if known"
-              hint="Only include facts provided by the client — the letter should address return intent, not invent explanations."
+              hint="Only include facts provided by the client."
             />
           ) : null}
         </CardContent>
       </Card>
 
+      {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
           <CardTitle>Home Country Ties</CardTitle>
@@ -447,12 +514,11 @@ export function ClientInfoForm() {
         </CardContent>
       </Card>
 
+      {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Reservations & Sponsorship</CardTitle>
-          <CardDescription>
-            Supporting documents and sponsor details.
-          </CardDescription>
+          <CardTitle>Reservations &amp; Sponsorship</CardTitle>
+          <CardDescription>Supporting documents and sponsor details.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <SwitchField
@@ -471,6 +537,7 @@ export function ClientInfoForm() {
         </CardContent>
       </Card>
 
+      {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
           <CardTitle>Consultant Notes</CardTitle>

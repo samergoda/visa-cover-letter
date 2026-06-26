@@ -1,12 +1,34 @@
 import { z } from "zod";
 import type { ClientInformation } from "@/types";
 
+/** ISO date string YYYY-MM-DD or empty */
+const dateField = (label: string) =>
+  z.string().refine(
+    (val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val),
+    { message: `${label} must be a valid date` }
+  );
+
+const requiredDateField = (label: string) =>
+  z.string()
+    .min(1, `${label} is required`)
+    .refine(
+      (val) => /^\d{4}-\d{2}-\d{2}$/.test(val),
+      { message: `${label} must be a valid date` }
+    );
+
 export const clientFormSchema = z
   .object({
-    fullName: z.string().min(2, "Full name is required"),
-    passportNumber: z.string().min(3, "Passport number is required"),
+    fullName: z
+      .string()
+      .min(2, "Full name must be at least 2 characters")
+      .regex(/^[A-Za-z\s\-'.]+$/, "Full name may only contain letters, spaces, hyphens, and apostrophes"),
+    passportNumber: z
+      .string()
+      .min(5, "Passport number must be at least 5 characters")
+      .max(20, "Passport number is too long")
+      .regex(/^[A-Z0-9]+$/i, "Passport number may only contain letters and numbers"),
     nationality: z.string().min(2, "Nationality is required"),
-    dateOfBirth: z.string().min(1, "Date of birth is required"),
+    dateOfBirth: requiredDateField("Date of birth"),
     maritalStatus: z.enum([
       "single",
       "married",
@@ -19,21 +41,28 @@ export const clientFormSchema = z
       .optional()
       .refine(
         (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
-        { message: "Invalid email" }
+        { message: "Invalid email address" }
       ),
-    phone: z.string().optional(),
+    phone: z
+      .string()
+      .optional()
+      .refine(
+        (val) => !val || /^[\d\s+\-().]{7,20}$/.test(val),
+        { message: "Invalid phone number" }
+      ),
     currentAddress: z.string().optional(),
     cityOfResidence: z.string().optional(),
-    passportIssueDate: z.string().optional(),
-    passportExpiryDate: z.string().optional(),
+    passportIssueDate: dateField("Passport issue date"),
+    passportExpiryDate: dateField("Passport expiry date"),
     destinationCountry: z.string().min(2, "Destination country is required"),
     purposeOfTravel: z.string().min(3, "Purpose of travel is required"),
     visaType: z.string().optional(),
     embassyCity: z.string().optional(),
     numberOfEntries: z.string().optional(),
-    travelStartDate: z.string().min(1, "Travel start date is required"),
-    travelEndDate: z.string().min(1, "Travel end date is required"),
-    duration: z.string().min(1, "Duration is required"),
+    travelStartDate: requiredDateField("Travel start date"),
+    travelEndDate: requiredDateField("Travel end date"),
+    /** Auto-calculated from start/end dates — not editable by user */
+    duration: z.string(),
     hostName: z.string().optional(),
     hostAddress: z.string().optional(),
     itinerary: z.string().optional(),
@@ -43,7 +72,7 @@ export const clientFormSchema = z
     employmentType: z.string().optional(),
     monthlySalary: z.string().optional(),
     annualIncome: z.string().optional(),
-    employmentStartDate: z.string().optional(),
+    employmentStartDate: dateField("Employment start date"),
     bankBalance: z.string().optional(),
     tripFundedBy: z.string().optional(),
     travelInsuranceAvailable: z.boolean(),
@@ -69,6 +98,16 @@ export const clientFormSchema = z
     {
       message: "End date must be on or after start date",
       path: ["travelEndDate"],
+    }
+  )
+  .refine(
+    (data) => {
+      if (!data.passportIssueDate || !data.passportExpiryDate) return true;
+      return new Date(data.passportExpiryDate) > new Date(data.passportIssueDate);
+    },
+    {
+      message: "Passport expiry must be after issue date",
+      path: ["passportExpiryDate"],
     }
   );
 
