@@ -10,7 +10,9 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   if (!status) {
     return (
-      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium text-muted-foreground ${className ?? ""}`}>
+      <span
+        className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium text-muted-foreground ${className ?? ""}`}
+      >
         No Status
       </span>
     );

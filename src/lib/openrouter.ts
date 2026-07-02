@@ -42,8 +42,7 @@ export function getOpenRouterBaseUrl(): string {
 export async function createChatCompletion(
   options: OpenRouterCompletionOptions
 ): Promise<OpenRouterCompletionResult> {
-  const { apiKey, model, messages, temperature = 0.4, maxTokens = 1200 } =
-    options;
+  const { apiKey, model, messages, temperature = 0.4, maxTokens = 1200 } = options;
 
   if (!apiKey.trim()) {
     throw new OpenRouterError("OpenRouter API key is required", 401);

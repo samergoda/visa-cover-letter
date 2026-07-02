@@ -39,18 +39,14 @@ export async function getApplicants(
     );
   }
   if (status_id) query = query.eq("status_id", status_id);
-  if (destination_country)
-    query = query.ilike("destination_country", `%${destination_country}%`);
-  if (assigned_employee)
-    query = query.ilike("assigned_employee", `%${assigned_employee}%`);
+  if (destination_country) query = query.ilike("destination_country", `%${destination_country}%`);
+  if (assigned_employee) query = query.ilike("assigned_employee", `%${assigned_employee}%`);
 
   // Pagination
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  query = query
-    .order(sortBy, { ascending: sortDir === "asc" })
-    .range(from, to);
+  query = query.order(sortBy, { ascending: sortDir === "asc" }).range(from, to);
 
   const { data, error, count } = await query;
 
@@ -111,7 +107,12 @@ export async function createApplicant(
   }
 
   // Log activity
-  await logActivity(applicant.id, "applicant_created", `Applicant ${applicant.full_name} was created`, performedBy);
+  await logActivity(
+    applicant.id,
+    "applicant_created",
+    `Applicant ${applicant.full_name} was created`,
+    performedBy
+  );
 
   return applicant;
 }
@@ -133,7 +134,13 @@ export async function updateApplicant(
   if (error) throw new Error(error.message);
   const applicant = data as Applicant;
 
-  await logActivity(id, "applicant_updated", `Applicant information was updated`, performedBy, updates as Record<string, unknown>);
+  await logActivity(
+    id,
+    "applicant_updated",
+    `Applicant information was updated`,
+    performedBy,
+    updates as Record<string, unknown>
+  );
 
   return applicant;
 }
@@ -146,10 +153,7 @@ export async function deleteApplicant(id: string): Promise<void> {
 
 export async function bulkDeleteApplicants(ids: string[]): Promise<void> {
   const supabase = createAdminClient();
-  const { error } = await supabase
-    .from("applicants")
-    .delete()
-    .in("id", ids);
+  const { error } = await supabase.from("applicants").delete().in("id", ids);
   if (error) throw new Error(error.message);
 }
 
@@ -159,10 +163,7 @@ export async function bulkUpdateStatus(
   performedBy?: string
 ): Promise<void> {
   const supabase = createAdminClient();
-  const { error } = await supabase
-    .from("applicants")
-    .update({ status_id: statusId })
-    .in("id", ids);
+  const { error } = await supabase.from("applicants").update({ status_id: statusId }).in("id", ids);
   if (error) throw new Error(error.message);
 
   // Log for each
@@ -175,9 +176,7 @@ export async function bulkUpdateStatus(
 // Documents
 // ============================================================
 
-export async function getApplicantDocuments(
-  applicantId: string
-): Promise<ApplicantDocument[]> {
+export async function getApplicantDocuments(applicantId: string): Promise<ApplicantDocument[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("applicant_documents")
@@ -194,11 +193,7 @@ export async function addDocument(
   performedBy?: string
 ): Promise<ApplicantDocument> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("applicant_documents")
-    .insert(doc)
-    .select()
-    .single();
+  const { data, error } = await supabase.from("applicant_documents").insert(doc).select().single();
 
   if (error) throw new Error(error.message);
 
@@ -219,28 +214,18 @@ export async function deleteDocument(
   performedBy?: string
 ): Promise<void> {
   const supabase = createAdminClient();
-  const { error } = await supabase
-    .from("applicant_documents")
-    .delete()
-    .eq("id", documentId);
+  const { error } = await supabase.from("applicant_documents").delete().eq("id", documentId);
 
   if (error) throw new Error(error.message);
 
-  await logActivity(
-    applicantId,
-    "file_deleted",
-    `File "${fileName}" was deleted`,
-    performedBy
-  );
+  await logActivity(applicantId, "file_deleted", `File "${fileName}" was deleted`, performedBy);
 }
 
 // ============================================================
 // Checklists
 // ============================================================
 
-export async function getApplicantChecklists(
-  applicantId: string
-): Promise<ApplicantChecklist[]> {
+export async function getApplicantChecklists(applicantId: string): Promise<ApplicantChecklist[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("applicant_checklists")
@@ -314,9 +299,7 @@ export async function recalculateProgress(applicantId: string): Promise<number> 
 // Notes
 // ============================================================
 
-export async function getApplicantNotes(
-  applicantId: string
-): Promise<ApplicantNote[]> {
+export async function getApplicantNotes(applicantId: string): Promise<ApplicantNote[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("applicant_notes")
@@ -333,11 +316,7 @@ export async function addNote(
   performedBy?: string
 ): Promise<ApplicantNote> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("applicant_notes")
-    .insert(note)
-    .select()
-    .single();
+  const { data, error } = await supabase.from("applicant_notes").insert(note).select().single();
 
   if (error) throw new Error(error.message);
 
@@ -355,9 +334,7 @@ export async function addNote(
 // Activity Log
 // ============================================================
 
-export async function getActivityLogs(
-  applicantId: string
-): Promise<ActivityLog[]> {
+export async function getActivityLogs(applicantId: string): Promise<ActivityLog[]> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("applicant_activity_logs")
@@ -395,7 +372,9 @@ export async function getDashboardStats() {
 
   const { data: applicants } = await supabase
     .from("applicants")
-    .select("status_id, visa_status:visa_statuses(name), destination_country, created_at");
+    .select(
+      "id, full_name, status_id, visa_status:visa_statuses(name), destination_country, created_at"
+    );
 
   if (!applicants) return null;
 
@@ -419,12 +398,25 @@ export async function getDashboardStats() {
     monthlyCounts[month] = (monthlyCounts[month] ?? 0) + 1;
   }
 
+  // Get recent applicants
+  const recentApplicants = applicants
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5)
+    .map((a) => ({
+      id: a.id,
+      full_name: a.full_name,
+      destination_country: a.destination_country ?? "Unknown",
+      status: (a.visa_status as { name?: string } | null)?.name ?? "Unknown",
+      created_at: a.created_at,
+    }));
+
   return {
     total,
     waiting_documents: statusCounts["Waiting Documents"] ?? 0,
     submitted: statusCounts["Submitted"] ?? 0,
     approved: statusCounts["Approved"] ?? 0,
     rejected: statusCounts["Rejected"] ?? 0,
+    cancelled: statusCounts["Cancelled"] ?? 0,
     passport_returned: statusCounts["Passport Returned"] ?? 0,
     byStatus: Object.entries(statusCounts).map(([status, count]) => ({
       status,
@@ -437,5 +429,6 @@ export async function getDashboardStats() {
     byMonth: Object.entries(monthlyCounts)
       .sort((a, b) => new Date(`1 ${a[0]}`).getTime() - new Date(`1 ${b[0]}`).getTime())
       .map(([month, count]) => ({ month, count })),
+    recentApplicants,
   };
 }

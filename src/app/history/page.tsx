@@ -6,20 +6,10 @@ import { format } from "date-fns";
 import { toast } from "sonner";
 import { Eye, Trash2 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  clearHistory,
-  deleteFromHistory,
-  getHistory,
-} from "@/lib/storage";
+import { clearHistory, deleteFromHistory, getHistory } from "@/lib/storage";
 import type { GeneratedLetter } from "@/types";
 
 export default function HistoryPage() {
@@ -88,9 +78,7 @@ export default function HistoryPage() {
               <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
                 <div className="space-y-1">
                   <p className="font-semibold">{item.clientName}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {item.destinationCountry}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{item.destinationCountry}</p>
                   <p className="text-xs text-muted-foreground">
                     {format(new Date(item.createdAt), "PPP p")}
                   </p>
@@ -102,11 +90,7 @@ export default function HistoryPage() {
                       View
                     </Link>
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(item.id)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>
                     <Trash2 className="h-4 w-4" />
                     Delete
                   </Button>

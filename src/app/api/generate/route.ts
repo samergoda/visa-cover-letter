@@ -34,16 +34,10 @@ export async function POST(request: Request) {
     const body = (await request.json()) as GenerateRequestBody;
 
     if (!body.client?.fullName || !body.client?.destinationCountry) {
-      return NextResponse.json(
-        { error: "Client information is incomplete." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Client information is incomplete." }, { status: 400 });
     }
 
-    const model =
-      body.model && VALID_MODELS.includes(body.model)
-        ? body.model
-        : DEFAULT_MODEL;
+    const model = body.model && VALID_MODELS.includes(body.model) ? body.model : DEFAULT_MODEL;
 
     const prompt = buildCoverLetterPrompt(body.client);
 

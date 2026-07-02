@@ -3,23 +3,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
-import {
-  Plus,
-  Pencil,
-  Trash2,
-  Check,
-  X,
-  ChevronUp,
-  ChevronDown,
-} from "lucide-react";
+import { Plus, Pencil, Trash2, Check, X, ChevronUp, ChevronDown } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,31 +40,51 @@ function VisaStatusesPanel() {
 
   const fetch_ = useCallback(async () => {
     const res = await fetch("/api/settings/statuses");
-    const data = await res.json() as VisaStatus[];
+    const data = (await res.json()) as VisaStatus[];
     setStatuses(data);
     setIsLoading(false);
   }, []);
 
-  useEffect(() => { void fetch_(); }, [fetch_]);
+  useEffect(() => {
+    void fetch_();
+  }, [fetch_]);
 
   const handleAdd = async () => {
-    if (!newName.trim()) { toast.error("Name is required"); return; }
+    if (!newName.trim()) {
+      toast.error("Name is required");
+      return;
+    }
     setAdding(true);
     try {
       const res = await fetch("/api/settings/statuses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName.trim(), color: newColor, order_index: statuses.length }),
+        body: JSON.stringify({
+          name: newName.trim(),
+          color: newColor,
+          order_index: statuses.length,
+        }),
       });
-      if (!res.ok) { const e = await res.json() as { error: string }; toast.error(e.error ?? "Failed"); return; }
+      if (!res.ok) {
+        const e = (await res.json()) as { error: string };
+        toast.error(e.error ?? "Failed");
+        return;
+      }
       toast.success("Status created");
-      setNewName(""); setNewColor("#6b7280"); setShowAdd(false);
+      setNewName("");
+      setNewColor("#6b7280");
+      setShowAdd(false);
       void fetch_();
-    } finally { setAdding(false); }
+    } finally {
+      setAdding(false);
+    }
   };
 
   const handleEdit = async (id: string) => {
-    if (!editName.trim()) { toast.error("Name is required"); return; }
+    if (!editName.trim()) {
+      toast.error("Name is required");
+      return;
+    }
     await fetch(`/api/settings/statuses/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -100,7 +106,10 @@ function VisaStatusesPanel() {
 
   const handleDelete = async (id: string) => {
     const res = await fetch(`/api/settings/statuses/${id}`, { method: "DELETE" });
-    if (!res.ok) { toast.error("Cannot delete — status may be in use"); return; }
+    if (!res.ok) {
+      toast.error("Cannot delete — status may be in use");
+      return;
+    }
     toast.success("Status deleted");
     void fetch_();
   };
@@ -118,7 +127,14 @@ function VisaStatusesPanel() {
     });
   };
 
-  if (isLoading) return <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>;
+  if (isLoading)
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-14 w-full" />
+        ))}
+      </div>
+    );
 
   return (
     <div className="space-y-4">
@@ -134,44 +150,89 @@ function VisaStatusesPanel() {
           <div className="flex flex-wrap gap-3 items-end">
             <div className="space-y-1.5 flex-1 min-w-[160px]">
               <Label htmlFor="new-status-name">Name</Label>
-              <Input id="new-status-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Under Review" />
+              <Input
+                id="new-status-name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="e.g. Under Review"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="new-status-color">Color</Label>
               <div className="flex items-center gap-2">
-                <input type="color" id="new-status-color" value={newColor} onChange={(e) => setNewColor(e.target.value)} className="h-9 w-12 cursor-pointer rounded border p-0.5" />
+                <input
+                  type="color"
+                  id="new-status-color"
+                  value={newColor}
+                  onChange={(e) => setNewColor(e.target.value)}
+                  className="h-9 w-12 cursor-pointer rounded border p-0.5"
+                />
                 <span className="text-sm font-mono text-muted-foreground">{newColor}</span>
               </div>
             </div>
             <Button size="sm" onClick={handleAdd} disabled={adding}>
-              {adding ? "Creating..." : <><Check className="mr-1.5 h-4 w-4" />Create</>}
+              {adding ? (
+                "Creating..."
+              ) : (
+                <>
+                  <Check className="mr-1.5 h-4 w-4" />
+                  Create
+                </>
+              )}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}><X className="h-4 w-4" /></Button>
+            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}
 
       <div className="divide-y rounded-lg border">
         {statuses.map((status, i) => (
-          <div key={status.id} className={`flex items-center gap-3 px-4 py-3 ${!status.is_active ? "opacity-50" : ""}`}>
+          <div
+            key={status.id}
+            className={`flex items-center gap-3 px-4 py-3 ${!status.is_active ? "opacity-50" : ""}`}
+          >
             {/* Reorder */}
             <div className="flex flex-col gap-0.5 shrink-0">
-              <button onClick={() => handleMove(i, -1)} disabled={i === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20" aria-label="Move up">
+              <button
+                onClick={() => handleMove(i, -1)}
+                disabled={i === 0}
+                className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"
+                aria-label="Move up"
+              >
                 <ChevronUp className="h-3.5 w-3.5" />
               </button>
-              <button onClick={() => handleMove(i, 1)} disabled={i === statuses.length - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20" aria-label="Move down">
+              <button
+                onClick={() => handleMove(i, 1)}
+                disabled={i === statuses.length - 1}
+                className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"
+                aria-label="Move down"
+              >
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
             </div>
 
             {/* Color dot */}
-            <div className="h-3 w-3 rounded-full shrink-0" style={{ backgroundColor: status.color }} />
+            <div
+              className="h-3 w-3 rounded-full shrink-0"
+              style={{ backgroundColor: status.color }}
+            />
 
             {/* Name / edit */}
             {editingId === status.id ? (
               <div className="flex flex-1 items-center gap-2 flex-wrap">
-                <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="h-8 w-44" />
-                <input type="color" value={editColor} onChange={(e) => setEditColor(e.target.value)} className="h-8 w-10 cursor-pointer rounded border p-0.5" />
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="h-8 w-44"
+                />
+                <input
+                  type="color"
+                  value={editColor}
+                  onChange={(e) => setEditColor(e.target.value)}
+                  className="h-8 w-10 cursor-pointer rounded border p-0.5"
+                />
                 <Button size="sm" onClick={() => handleEdit(status.id)}>
                   <Check className="h-4 w-4" />
                 </Button>
@@ -188,23 +249,43 @@ function VisaStatusesPanel() {
                     onCheckedChange={() => handleToggleActive(status)}
                     aria-label={`Toggle ${status.name}`}
                   />
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingId(status.id); setEditName(status.name); setEditColor(status.color); }}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      setEditingId(status.id);
+                      setEditName(status.name);
+                      setEditColor(status.color);
+                    }}
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete &ldquo;{status.name}&rdquo;?</AlertDialogTitle>
-                        <AlertDialogDescription>This cannot be undone. Applicants with this status will lose it.</AlertDialogDescription>
+                        <AlertDialogDescription>
+                          This cannot be undone. Applicants with this status will lose it.
+                        </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(status.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(status.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -235,31 +316,51 @@ function ChecklistPanel() {
 
   const fetch_ = useCallback(async () => {
     const res = await fetch("/api/settings/checklists");
-    const data = await res.json() as ChecklistTemplate[];
+    const data = (await res.json()) as ChecklistTemplate[];
     setItems(data);
     setIsLoading(false);
   }, []);
 
-  useEffect(() => { void fetch_(); }, [fetch_]);
+  useEffect(() => {
+    void fetch_();
+  }, [fetch_]);
 
   const handleAdd = async () => {
-    if (!newName.trim()) { toast.error("Name is required"); return; }
+    if (!newName.trim()) {
+      toast.error("Name is required");
+      return;
+    }
     setAdding(true);
     try {
       const res = await fetch("/api/settings/checklists", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName.trim(), description: newDesc.trim() || null, order_index: items.length }),
+        body: JSON.stringify({
+          name: newName.trim(),
+          description: newDesc.trim() || null,
+          order_index: items.length,
+        }),
       });
-      if (!res.ok) { const e = await res.json() as { error: string }; toast.error(e.error ?? "Failed"); return; }
+      if (!res.ok) {
+        const e = (await res.json()) as { error: string };
+        toast.error(e.error ?? "Failed");
+        return;
+      }
       toast.success("Checklist item created");
-      setNewName(""); setNewDesc(""); setShowAdd(false);
+      setNewName("");
+      setNewDesc("");
+      setShowAdd(false);
       void fetch_();
-    } finally { setAdding(false); }
+    } finally {
+      setAdding(false);
+    }
   };
 
   const handleEdit = async (id: string) => {
-    if (!editName.trim()) { toast.error("Name is required"); return; }
+    if (!editName.trim()) {
+      toast.error("Name is required");
+      return;
+    }
     await fetch(`/api/settings/checklists/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -298,7 +399,14 @@ function ChecklistPanel() {
     });
   };
 
-  if (isLoading) return <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>;
+  if (isLoading)
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-14 w-full" />
+        ))}
+      </div>
+    );
 
   return (
     <div className="space-y-4">
@@ -313,32 +421,66 @@ function ChecklistPanel() {
           <h3 className="text-sm font-semibold">New Checklist Item</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="new-cl-name">Name <span className="text-destructive">*</span></Label>
-              <Input id="new-cl-name" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Passport Received" />
+              <Label htmlFor="new-cl-name">
+                Name <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="new-cl-name"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="e.g. Passport Received"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="new-cl-desc">Description (optional)</Label>
-              <Input id="new-cl-desc" value={newDesc} onChange={(e) => setNewDesc(e.target.value)} placeholder="Short description" />
+              <Input
+                id="new-cl-desc"
+                value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+                placeholder="Short description"
+              />
             </div>
           </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={handleAdd} disabled={adding}>
-              {adding ? "Creating..." : <><Check className="mr-1.5 h-4 w-4" />Create</>}
+              {adding ? (
+                "Creating..."
+              ) : (
+                <>
+                  <Check className="mr-1.5 h-4 w-4" />
+                  Create
+                </>
+              )}
             </Button>
-            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}><X className="h-4 w-4" /></Button>
+            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>
+              <X className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       )}
 
       <div className="divide-y rounded-lg border">
         {items.map((item, i) => (
-          <div key={item.id} className={`flex items-start gap-3 px-4 py-3 ${!item.is_active ? "opacity-50" : ""}`}>
+          <div
+            key={item.id}
+            className={`flex items-start gap-3 px-4 py-3 ${!item.is_active ? "opacity-50" : ""}`}
+          >
             {/* Reorder */}
             <div className="flex flex-col gap-0.5 shrink-0 pt-0.5">
-              <button onClick={() => handleMove(i, -1)} disabled={i === 0} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20" aria-label="Move up">
+              <button
+                onClick={() => handleMove(i, -1)}
+                disabled={i === 0}
+                className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"
+                aria-label="Move up"
+              >
                 <ChevronUp className="h-3.5 w-3.5" />
               </button>
-              <button onClick={() => handleMove(i, 1)} disabled={i === items.length - 1} className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20" aria-label="Move down">
+              <button
+                onClick={() => handleMove(i, 1)}
+                disabled={i === items.length - 1}
+                className="p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-20"
+                aria-label="Move down"
+              >
                 <ChevronDown className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -346,16 +488,32 @@ function ChecklistPanel() {
             {/* Content / edit */}
             {editingId === item.id ? (
               <div className="flex flex-1 flex-wrap items-center gap-2">
-                <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="h-8 w-48" placeholder="Name" />
-                <Input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} className="h-8 flex-1 min-w-[160px]" placeholder="Description" />
-                <Button size="sm" onClick={() => handleEdit(item.id)}><Check className="h-4 w-4" /></Button>
-                <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}><X className="h-4 w-4" /></Button>
+                <Input
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="h-8 w-48"
+                  placeholder="Name"
+                />
+                <Input
+                  value={editDesc}
+                  onChange={(e) => setEditDesc(e.target.value)}
+                  className="h-8 flex-1 min-w-[160px]"
+                  placeholder="Description"
+                />
+                <Button size="sm" onClick={() => handleEdit(item.id)}>
+                  <Check className="h-4 w-4" />
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setEditingId(null)}>
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
             ) : (
               <>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{item.name}</p>
-                  {item.description && <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>}
+                  {item.description && (
+                    <p className="text-xs text-muted-foreground mt-0.5">{item.description}</p>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant={item.is_active ? "default" : "outline"} className="text-xs">
@@ -366,23 +524,44 @@ function ChecklistPanel() {
                     onCheckedChange={() => handleToggleActive(item)}
                     aria-label={`Toggle ${item.name}`}
                   />
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => { setEditingId(item.id); setEditName(item.name); setEditDesc(item.description ?? ""); }}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8"
+                    onClick={() => {
+                      setEditingId(item.id);
+                      setEditName(item.name);
+                      setEditDesc(item.description ?? "");
+                    }}
+                  >
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive hover:text-destructive">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-destructive hover:text-destructive"
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Delete &ldquo;{item.name}&rdquo;?</AlertDialogTitle>
-                        <AlertDialogDescription>This will remove the checklist item from all new applicants. Existing applicant checklists won&apos;t be affected.</AlertDialogDescription>
+                        <AlertDialogDescription>
+                          This will remove the checklist item from all new applicants. Existing
+                          applicant checklists won&apos;t be affected.
+                        </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDelete(item.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                        <AlertDialogAction
+                          onClick={() => handleDelete(item.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
@@ -392,7 +571,9 @@ function ChecklistPanel() {
           </div>
         ))}
         {items.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">No checklist items configured.</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            No checklist items configured.
+          </p>
         )}
       </div>
     </div>
@@ -418,7 +599,8 @@ export default function AdminSettingsPage() {
               <CardHeader>
                 <CardTitle>Visa Statuses</CardTitle>
                 <CardDescription>
-                  Create and manage the statuses applicants can be assigned. Disable a status to hide it from dropdowns without losing existing data.
+                  Create and manage the statuses applicants can be assigned. Disable a status to
+                  hide it from dropdowns without losing existing data.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -432,7 +614,8 @@ export default function AdminSettingsPage() {
               <CardHeader>
                 <CardTitle>Checklist Templates</CardTitle>
                 <CardDescription>
-                  Items in this list are automatically added to every new applicant. Reorder them using the arrows. Disabling an item removes it from future applicants only.
+                  Items in this list are automatically added to every new applicant. Reorder them
+                  using the arrows. Disabling an item removes it from future applicants only.
                 </CardDescription>
               </CardHeader>
               <CardContent>

@@ -67,7 +67,12 @@ import type {
   ActivityLog,
   OpenRouterModel,
 } from "@/types";
-import { DOCUMENT_TYPE_LABELS, ACTIVITY_ACTION_LABELS, OPENROUTER_MODELS, DEFAULT_MODEL } from "@/types";
+import {
+  DOCUMENT_TYPE_LABELS,
+  ACTIVITY_ACTION_LABELS,
+  OPENROUTER_MODELS,
+  DEFAULT_MODEL,
+} from "@/types";
 
 // ─── Info Row helper ─────────────────────────────────────────────────────────
 function InfoRow({ label, value }: { label: string; value?: string | number | null }) {
@@ -88,16 +93,21 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
 
   const fetchDocs = useCallback(async () => {
     const res = await fetch(`/api/applicants/${applicantId}/documents`);
-    const data = await res.json() as ApplicantDocument[];
+    const data = (await res.json()) as ApplicantDocument[];
     setDocs(data);
     setIsLoading(false);
   }, [applicantId]);
 
-  useEffect(() => { void fetchDocs(); }, [fetchDocs]);
+  useEffect(() => {
+    void fetchDocs();
+  }, [fetchDocs]);
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !docType) { toast.error("Select a document type first"); return; }
+    if (!file || !docType) {
+      toast.error("Select a document type first");
+      return;
+    }
     setUploading(true);
     try {
       const formData = new FormData();
@@ -108,7 +118,7 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
         body: formData,
       });
       if (!res.ok) {
-        const err = await res.json() as { error: string };
+        const err = (await res.json()) as { error: string };
         toast.error(err.error ?? "Upload failed");
         return;
       }
@@ -142,13 +152,17 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
             </SelectTrigger>
             <SelectContent>
               {Object.entries(DOCUMENT_TYPE_LABELS).map(([k, v]) => (
-                <SelectItem key={k} value={k}>{v}</SelectItem>
+                <SelectItem key={k} value={k}>
+                  {v}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="file-upload" className="sr-only">Choose file</Label>
+          <Label htmlFor="file-upload" className="sr-only">
+            Choose file
+          </Label>
           <Button asChild variant="outline" disabled={!docType || uploading}>
             <label htmlFor="file-upload" className="cursor-pointer">
               <FileUp className="mr-2 h-4 w-4" />
@@ -167,7 +181,11 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
 
       {/* Document list */}
       {isLoading ? (
-        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-14 w-full" />
+          ))}
+        </div>
       ) : docs.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">No documents uploaded yet.</p>
       ) : (
@@ -177,31 +195,49 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
               <div className="min-w-0">
                 <p className="truncate text-sm font-medium">{doc.file_name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {DOCUMENT_TYPE_LABELS[doc.document_type as keyof typeof DOCUMENT_TYPE_LABELS] ?? doc.document_type}
+                  {DOCUMENT_TYPE_LABELS[doc.document_type as keyof typeof DOCUMENT_TYPE_LABELS] ??
+                    doc.document_type}
                   {doc.file_size ? ` · ${(doc.file_size / 1024).toFixed(1)} KB` : ""}
-                  {" · "}{format(new Date(doc.uploaded_at), "MMM d, yyyy")}
+                  {" · "}
+                  {format(new Date(doc.uploaded_at), "MMM d, yyyy")}
                 </p>
               </div>
               <div className="flex shrink-0 gap-2">
                 <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-                  <a href={doc.file_url} target="_blank" rel="noopener noreferrer" aria-label="Open document">
+                  <a
+                    href={doc.file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open document"
+                  >
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete document?</AlertDialogTitle>
-                      <AlertDialogDescription>This will permanently delete &ldquo;{doc.file_name}&rdquo;.</AlertDialogDescription>
+                      <AlertDialogDescription>
+                        This will permanently delete &ldquo;{doc.file_name}&rdquo;.
+                      </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDelete(doc)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(doc)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -215,22 +251,32 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
 }
 
 // ─── Checklist Panel ─────────────────────────────────────────────────────────
-function ChecklistPanel({ applicantId, onProgressChange }: { applicantId: string; onProgressChange: (p: number) => void }) {
+function ChecklistPanel({
+  applicantId,
+  onProgressChange,
+}: {
+  applicantId: string;
+  onProgressChange: (p: number) => void;
+}) {
   const [items, setItems] = useState<ApplicantChecklist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingNotes, setEditingNotes] = useState<Record<string, string>>({});
 
   const fetchItems = useCallback(async () => {
     const res = await fetch(`/api/applicants/${applicantId}/checklists`);
-    const data = await res.json() as ApplicantChecklist[];
+    const data = (await res.json()) as ApplicantChecklist[];
     setItems(data);
     setIsLoading(false);
   }, [applicantId]);
 
-  useEffect(() => { void fetchItems(); }, [fetchItems]);
+  useEffect(() => {
+    void fetchItems();
+  }, [fetchItems]);
 
   const handleToggle = async (item: ApplicantChecklist, checked: boolean) => {
-    setItems((prev) => prev.map((it) => it.id === item.id ? { ...it, is_completed: checked } : it));
+    setItems((prev) =>
+      prev.map((it) => (it.id === item.id ? { ...it, is_completed: checked } : it))
+    );
     const res = await fetch(`/api/applicants/${applicantId}/checklists`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -241,7 +287,9 @@ function ChecklistPanel({ applicantId, onProgressChange }: { applicantId: string
       }),
     });
     if (res.ok) {
-      const completed = items.filter((it) => (it.id === item.id ? checked : it.is_completed)).length;
+      const completed = items.filter((it) =>
+        it.id === item.id ? checked : it.is_completed
+      ).length;
       onProgressChange(Math.round((completed / items.length) * 100));
       void fetchItems();
     }
@@ -258,15 +306,31 @@ function ChecklistPanel({ applicantId, onProgressChange }: { applicantId: string
       }),
     });
     toast.success("Note saved");
-    setEditingNotes((prev) => { const n = { ...prev }; delete n[item.id]; return n; });
+    setEditingNotes((prev) => {
+      const n = { ...prev };
+      delete n[item.id];
+      return n;
+    });
     void fetchItems();
   };
 
   const completed = items.filter((i) => i.is_completed).length;
   const percentage = items.length > 0 ? Math.round((completed / items.length) * 100) : 0;
 
-  if (isLoading) return <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>;
-  if (items.length === 0) return <p className="py-8 text-center text-sm text-muted-foreground">No checklist items configured.</p>;
+  if (isLoading)
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-14 w-full" />
+        ))}
+      </div>
+    );
+  if (items.length === 0)
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">
+        No checklist items configured.
+      </p>
+    );
 
   return (
     <div className="space-y-4">
@@ -278,7 +342,9 @@ function ChecklistPanel({ applicantId, onProgressChange }: { applicantId: string
           </div>
           <Progress value={percentage} className="h-2" />
         </div>
-        <Badge variant="outline">{completed}/{items.length} completed</Badge>
+        <Badge variant="outline">
+          {completed}/{items.length} completed
+        </Badge>
       </div>
 
       <div className="divide-y rounded-lg border">
@@ -292,15 +358,23 @@ function ChecklistPanel({ applicantId, onProgressChange }: { applicantId: string
                 className="mt-0.5"
               />
               <div className="flex-1 min-w-0">
-                <label htmlFor={`cl-${item.id}`} className={`text-sm font-medium cursor-pointer ${item.is_completed ? "line-through text-muted-foreground" : ""}`}>
+                <label
+                  htmlFor={`cl-${item.id}`}
+                  className={`text-sm font-medium cursor-pointer ${item.is_completed ? "line-through text-muted-foreground" : ""}`}
+                >
                   {item.template?.name ?? "Unknown"}
                 </label>
                 {item.template?.description && (
-                  <p className="text-xs text-muted-foreground mt-0.5">{item.template.description}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {item.template.description}
+                  </p>
                 )}
                 {item.is_completed && item.completed_by && (
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Completed by {item.completed_by}{item.completed_at ? ` on ${format(new Date(item.completed_at), "MMM d, yyyy")}` : ""}
+                    Completed by {item.completed_by}
+                    {item.completed_at
+                      ? ` on ${format(new Date(item.completed_at), "MMM d, yyyy")}`
+                      : ""}
                   </p>
                 )}
               </div>
@@ -311,7 +385,9 @@ function ChecklistPanel({ applicantId, onProgressChange }: { applicantId: string
               <Textarea
                 placeholder="Internal notes..."
                 value={editingNotes[item.id] ?? item.notes ?? ""}
-                onChange={(e) => setEditingNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                onChange={(e) =>
+                  setEditingNotes((prev) => ({ ...prev, [item.id]: e.target.value }))
+                }
                 className="min-h-[60px] text-xs"
               />
               {editingNotes[item.id] !== undefined && (
@@ -337,15 +413,20 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
 
   const fetchNotes = useCallback(async () => {
     const res = await fetch(`/api/applicants/${applicantId}/notes`);
-    const data = await res.json() as ApplicantNote[];
+    const data = (await res.json()) as ApplicantNote[];
     setNotes(data);
     setIsLoading(false);
   }, [applicantId]);
 
-  useEffect(() => { void fetchNotes(); }, [fetchNotes]);
+  useEffect(() => {
+    void fetchNotes();
+  }, [fetchNotes]);
 
   const handleAdd = async () => {
-    if (!author.trim() || !content.trim()) { toast.error("Author and content are required"); return; }
+    if (!author.trim() || !content.trim()) {
+      toast.error("Author and content are required");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch(`/api/applicants/${applicantId}/notes`, {
@@ -370,11 +451,22 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
         <h3 className="text-sm font-semibold">Add Note</h3>
         <div className="space-y-1.5">
           <Label htmlFor="note-author">Your Name</Label>
-          <Input id="note-author" placeholder="John Smith" value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <Input
+            id="note-author"
+            placeholder="John Smith"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="note-content">Note</Label>
-          <Textarea id="note-content" placeholder="Write a note..." value={content} onChange={(e) => setContent(e.target.value)} className="min-h-[80px]" />
+          <Textarea
+            id="note-content"
+            placeholder="Write a note..."
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            className="min-h-[80px]"
+          />
         </div>
         <Button onClick={handleAdd} disabled={submitting} size="sm">
           <MessageSquarePlus className="mr-2 h-4 w-4" />
@@ -384,7 +476,11 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
 
       {/* Notes list */}
       {isLoading ? (
-        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}</div>
+        <div className="space-y-2">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full" />
+          ))}
+        </div>
       ) : notes.length === 0 ? (
         <p className="py-8 text-center text-sm text-muted-foreground">No notes yet.</p>
       ) : (
@@ -393,7 +489,9 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
             <div key={note.id} className="rounded-lg border p-4 space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold">{note.author}</span>
-                <span className="text-xs text-muted-foreground">{format(new Date(note.created_at), "MMM d, yyyy HH:mm")}</span>
+                <span className="text-xs text-muted-foreground">
+                  {format(new Date(note.created_at), "MMM d, yyyy HH:mm")}
+                </span>
               </div>
               <p className="text-sm whitespace-pre-wrap">{note.content}</p>
             </div>
@@ -412,7 +510,10 @@ function ActivityPanel({ applicantId }: { applicantId: string }) {
   useEffect(() => {
     fetch(`/api/applicants/${applicantId}/activity`)
       .then((r) => r.json())
-      .then((d: ActivityLog[]) => { setLogs(d); setIsLoading(false); })
+      .then((d: ActivityLog[]) => {
+        setLogs(d);
+        setIsLoading(false);
+      })
       .catch(() => setIsLoading(false));
   }, [applicantId]);
 
@@ -426,24 +527,41 @@ function ActivityPanel({ applicantId }: { applicantId: string }) {
     note_added: "bg-slate-500",
   };
 
-  if (isLoading) return <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full" />)}</div>;
-  if (logs.length === 0) return <p className="py-8 text-center text-sm text-muted-foreground">No activity logged yet.</p>;
+  if (isLoading)
+    return (
+      <div className="space-y-2">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full" />
+        ))}
+      </div>
+    );
+  if (logs.length === 0)
+    return (
+      <p className="py-8 text-center text-sm text-muted-foreground">No activity logged yet.</p>
+    );
 
   return (
     <div className="relative space-y-0">
       <div className="absolute left-[15px] top-2 bottom-2 w-px bg-border" />
       {logs.map((log) => (
         <div key={log.id} className="relative flex gap-4 pb-4">
-          <div className={`relative z-10 mt-1 h-[10px] w-[10px] shrink-0 rounded-full ${actionColors[log.action] ?? "bg-muted-foreground"}`} />
+          <div
+            className={`relative z-10 mt-1 h-[10px] w-[10px] shrink-0 rounded-full ${actionColors[log.action] ?? "bg-muted-foreground"}`}
+          />
           <div className="flex-1 min-w-0">
             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
               <span className="text-sm font-medium">
-                {ACTIVITY_ACTION_LABELS[log.action as keyof typeof ACTIVITY_ACTION_LABELS] ?? log.action}
+                {ACTIVITY_ACTION_LABELS[log.action as keyof typeof ACTIVITY_ACTION_LABELS] ??
+                  log.action}
               </span>
-              {log.performed_by && <span className="text-xs text-muted-foreground">by {log.performed_by}</span>}
+              {log.performed_by && (
+                <span className="text-xs text-muted-foreground">by {log.performed_by}</span>
+              )}
             </div>
             <p className="text-xs text-muted-foreground">{log.description}</p>
-            <p className="text-xs text-muted-foreground">{format(new Date(log.created_at), "MMM d, yyyy HH:mm")}</p>
+            <p className="text-xs text-muted-foreground">
+              {format(new Date(log.created_at), "MMM d, yyyy HH:mm")}
+            </p>
           </div>
         </div>
       ))}
@@ -517,7 +635,7 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ client: buildClientPayload(), model }),
       });
-      const data = await res.json() as { content?: string; error?: string };
+      const data = (await res.json()) as { content?: string; error?: string };
       if (!res.ok || !data.content) {
         toast.error(data.error ?? "Failed to generate letter");
         return;
@@ -545,23 +663,34 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
             </SelectTrigger>
             <SelectContent>
               {OPENROUTER_MODELS.map((m) => (
-                <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                <SelectItem key={m.value} value={m.value}>
+                  {m.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <Button onClick={handleGenerate} disabled={isGenerating}>
-          {isGenerating
-            ? <><RefreshCw className="mr-2 h-4 w-4 animate-spin" />Generating...</>
-            : <><Wand2 className="mr-2 h-4 w-4" />{letter ? "Regenerate" : "Generate Cover Letter"}</>
-          }
+          {isGenerating ? (
+            <>
+              <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Wand2 className="mr-2 h-4 w-4" />
+              {letter ? "Regenerate" : "Generate Cover Letter"}
+            </>
+          )}
         </Button>
       </div>
 
       {/* Preview */}
       {isGenerating && (
         <div className="space-y-2">
-          {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-4 w-full" />)}
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Skeleton key={i} className="h-4 w-full" />
+          ))}
           <Skeleton className="h-4 w-3/4" />
         </div>
       )}
@@ -573,23 +702,37 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
               <CardTitle className="text-base">Generated Letter</CardTitle>
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="secondary">{wordCount} words</Badge>
-                <Button size="sm" variant="outline" onClick={async () => {
-                  await copyToClipboard(letter);
-                  toast.success("Copied to clipboard");
-                }}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={async () => {
+                    await copyToClipboard(letter);
+                    toast.success("Copied to clipboard");
+                  }}
+                >
                   <Copy className="mr-1.5 h-3.5 w-3.5" /> Copy
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => exportToDocx(letter, applicant.full_name, applicant.destination_country)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    exportToDocx(letter, applicant.full_name, applicant.destination_country)
+                  }
+                >
                   <FileDown className="mr-1.5 h-3.5 w-3.5" /> DOCX
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => exportToPdf(letter, applicant.full_name, applicant.destination_country)}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() =>
+                    exportToPdf(letter, applicant.full_name, applicant.destination_country)
+                  }
+                >
                   <Download className="mr-1.5 h-3.5 w-3.5" /> PDF
                 </Button>
               </div>
             </div>
-            <CardDescription>
-              You can edit the letter directly before exporting.
-            </CardDescription>
+            <CardDescription>You can edit the letter directly before exporting.</CardDescription>
           </CardHeader>
           <CardContent>
             <Textarea
@@ -604,8 +747,14 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
       {!letter && !isGenerating && (
         <div className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
           <Wand2 className="h-10 w-10 opacity-20" />
-          <p className="text-sm">Click &ldquo;Generate Cover Letter&rdquo; to create a letter using this applicant&apos;s data.</p>
-          <p className="text-xs">Requires an OpenRouter API key in <code className="text-xs bg-muted px-1 rounded">.env.local</code></p>
+          <p className="text-sm">
+            Click &ldquo;Generate Cover Letter&rdquo; to create a letter using this applicant&apos;s
+            data.
+          </p>
+          <p className="text-xs">
+            Requires an OpenRouter API key in{" "}
+            <code className="text-xs bg-muted px-1 rounded">.env.local</code>
+          </p>
         </div>
       )}
     </div>
@@ -623,17 +772,35 @@ export default function ApplicantProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [statuses, setStatuses] = useState<{ id: string; name: string; color: string }[]>([]);
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
 
   const fetchApplicant = useCallback(async () => {
     const res = await fetch(`/api/applicants/${id}`);
-    if (!res.ok) { toast.error("Applicant not found"); router.push("/applicants"); return; }
-    const data = await res.json() as Applicant;
+    if (!res.ok) {
+      toast.error("Applicant not found");
+      router.push("/applicants");
+      return;
+    }
+    const data = (await res.json()) as Applicant;
     setApplicant(data);
     setProgress(data.progress_percentage);
     setIsLoading(false);
   }, [id, router]);
 
-  useEffect(() => { void fetchApplicant(); }, [fetchApplicant]);
+  useEffect(() => {
+    void fetchApplicant();
+  }, [fetchApplicant]);
+
+  // Fetch available statuses
+  useEffect(() => {
+    fetch("/api/settings/statuses")
+      .then((r) => r.json())
+      .then((d: { id: string; name: string; color: string; is_active: boolean }[]) =>
+        setStatuses(d.filter((s) => s.is_active))
+      )
+      .catch(() => {});
+  }, []);
 
   const handleSave = async (values: ApplicantFormValues) => {
     setIsSaving(true);
@@ -648,7 +815,10 @@ export default function ApplicantProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!res.ok) { toast.error("Failed to save changes"); return; }
+      if (!res.ok) {
+        toast.error("Failed to save changes");
+        return;
+      }
       toast.success("Applicant updated");
       setIsEditing(false);
       void fetchApplicant();
@@ -661,6 +831,26 @@ export default function ApplicantProfilePage() {
     await fetch(`/api/applicants/${id}`, { method: "DELETE" });
     toast.success("Applicant deleted");
     router.push("/applicants");
+  };
+
+  const handleStatusChange = async (newStatusId: string) => {
+    if (!applicant) return;
+    setIsChangingStatus(true);
+    try {
+      const res = await fetch(`/api/applicants/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status_id: newStatusId }),
+      });
+      if (!res.ok) {
+        toast.error("Failed to update status");
+        return;
+      }
+      toast.success("Status updated");
+      void fetchApplicant();
+    } finally {
+      setIsChangingStatus(false);
+    }
   };
 
   if (isLoading) {
@@ -686,15 +876,48 @@ export default function ApplicantProfilePage() {
         {/* Header toolbar */}
         <div className="flex flex-wrap items-center gap-3">
           <Button variant="ghost" size="sm" asChild>
-            <Link href="/applicants"><ArrowLeft className="mr-2 h-4 w-4" /> All Applicants</Link>
+            <Link href="/applicants">
+              <ArrowLeft className="mr-2 h-4 w-4" /> All Applicants
+            </Link>
           </Button>
 
           <div className="flex items-center gap-2 ml-auto">
             <StatusBadge status={applicant.visa_status} />
 
+            {/* Quick Status Changer */}
+            <div className="flex items-center gap-2">
+              <Select
+                value={applicant.status_id ?? ""}
+                onValueChange={handleStatusChange}
+                disabled={isChangingStatus || isEditing}
+              >
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Change status..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((status) => (
+                    <SelectItem key={status.id} value={status.id}>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-2 h-2 rounded-full"
+                          style={{ backgroundColor: status.color }}
+                        />
+                        {status.name}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             {isEditing ? (
               <>
-                <Button size="sm" variant="outline" onClick={() => setIsEditing(false)} disabled={isSaving}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setIsEditing(false)}
+                  disabled={isSaving}
+                >
                   <X className="mr-1.5 h-4 w-4" /> Cancel
                 </Button>
               </>
@@ -714,12 +937,18 @@ export default function ApplicantProfilePage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete {applicant.full_name}?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This permanently deletes the applicant and all associated documents, notes, and activity logs.
+                    This permanently deletes the applicant and all associated documents, notes, and
+                    activity logs.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Delete</AlertDialogAction>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -754,7 +983,9 @@ export default function ApplicantProfilePage() {
             </div>
             <div className="p-4">
               <ApplicantForm
-                initialValues={applicantToFormValues(applicant as unknown as Record<string, unknown>)}
+                initialValues={applicantToFormValues(
+                  applicant as unknown as Record<string, unknown>
+                )}
                 onSubmit={handleSave}
                 isSubmitting={isSaving}
                 submitLabel="Save Changes"
@@ -764,56 +995,110 @@ export default function ApplicantProfilePage() {
         ) : (
           <Tabs defaultValue="info">
             <TabsList className="flex-wrap h-auto gap-1">
-              <TabsTrigger value="info"><User className="mr-1.5 h-4 w-4" />Personal</TabsTrigger>
-              <TabsTrigger value="travel"><Plane className="mr-1.5 h-4 w-4" />Travel</TabsTrigger>
-              <TabsTrigger value="documents"><FileText className="mr-1.5 h-4 w-4" />Documents</TabsTrigger>
-              <TabsTrigger value="checklist"><CheckSquare className="mr-1.5 h-4 w-4" />Checklist</TabsTrigger>
-              <TabsTrigger value="notes"><MessageSquarePlus className="mr-1.5 h-4 w-4" />Notes</TabsTrigger>
-              <TabsTrigger value="activity"><Activity className="mr-1.5 h-4 w-4" />Activity</TabsTrigger>
-              <TabsTrigger value="cover-letter"><Wand2 className="mr-1.5 h-4 w-4" />Cover Letter</TabsTrigger>
+              <TabsTrigger value="info">
+                <User className="mr-1.5 h-4 w-4" />
+                Personal
+              </TabsTrigger>
+              <TabsTrigger value="travel">
+                <Plane className="mr-1.5 h-4 w-4" />
+                Travel
+              </TabsTrigger>
+              <TabsTrigger value="documents">
+                <FileText className="mr-1.5 h-4 w-4" />
+                Documents
+              </TabsTrigger>
+              <TabsTrigger value="checklist">
+                <CheckSquare className="mr-1.5 h-4 w-4" />
+                Checklist
+              </TabsTrigger>
+              <TabsTrigger value="notes">
+                <MessageSquarePlus className="mr-1.5 h-4 w-4" />
+                Notes
+              </TabsTrigger>
+              <TabsTrigger value="activity">
+                <Activity className="mr-1.5 h-4 w-4" />
+                Activity
+              </TabsTrigger>
+              <TabsTrigger value="cover-letter">
+                <Wand2 className="mr-1.5 h-4 w-4" />
+                Cover Letter
+              </TabsTrigger>
             </TabsList>
 
             {/* Personal + Passport */}
             <TabsContent value="info" className="mt-4 space-y-4">
               <Card>
-                <CardHeader><CardTitle className="text-base">Personal Information</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="text-base">Personal Information</CardTitle>
+                </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   <InfoRow label="Full Name" value={applicant.full_name} />
                   <InfoRow label="Nationality" value={applicant.nationality} />
                   <InfoRow label="Gender" value={applicant.gender} />
-                  <InfoRow label="Date of Birth" value={applicant.date_of_birth ? format(new Date(applicant.date_of_birth), "MMM d, yyyy") : null} />
+                  <InfoRow
+                    label="Date of Birth"
+                    value={
+                      applicant.date_of_birth
+                        ? format(new Date(applicant.date_of_birth), "MMM d, yyyy")
+                        : null
+                    }
+                  />
                   <InfoRow label="Place of Birth" value={applicant.place_of_birth} />
                   <InfoRow label="Marital Status" value={applicant.marital_status} />
                   <InfoRow label="Occupation" value={applicant.occupation} />
                   <InfoRow label="Employer" value={applicant.employer} />
                   <InfoRow label="Phone" value={applicant.phone} />
                   <InfoRow label="Email" value={applicant.email} />
-                  <div className="col-span-2 sm:col-span-3"><InfoRow label="Home Address" value={applicant.home_address} /></div>
+                  <div className="col-span-2 sm:col-span-3">
+                    <InfoRow label="Home Address" value={applicant.home_address} />
+                  </div>
                 </CardContent>
               </Card>
               <Card>
-                <CardHeader><CardTitle className="text-base">Passport Details</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="text-base">Passport Details</CardTitle>
+                </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   <InfoRow label="Passport Number" value={applicant.passport_number} />
                   <InfoRow label="Issuing Country" value={applicant.passport_issuing_country} />
-                  <InfoRow label="Issue Date" value={applicant.passport_issue_date ? format(new Date(applicant.passport_issue_date), "MMM d, yyyy") : null} />
-                  <InfoRow label="Expiry Date" value={applicant.passport_expiry_date ? format(new Date(applicant.passport_expiry_date), "MMM d, yyyy") : null} />
+                  <InfoRow
+                    label="Issue Date"
+                    value={
+                      applicant.passport_issue_date
+                        ? format(new Date(applicant.passport_issue_date), "MMM d, yyyy")
+                        : null
+                    }
+                  />
+                  <InfoRow
+                    label="Expiry Date"
+                    value={
+                      applicant.passport_expiry_date
+                        ? format(new Date(applicant.passport_expiry_date), "MMM d, yyyy")
+                        : null
+                    }
+                  />
                 </CardContent>
               </Card>
               {(applicant.sponsor_name || applicant.sponsor_relationship) && (
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Sponsor Information</CardTitle></CardHeader>
+                  <CardHeader>
+                    <CardTitle className="text-base">Sponsor Information</CardTitle>
+                  </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                     <InfoRow label="Sponsor Name" value={applicant.sponsor_name} />
                     <InfoRow label="Relationship" value={applicant.sponsor_relationship} />
                     <InfoRow label="Sponsor Phone" value={applicant.sponsor_phone} />
-                    <div className="col-span-2 sm:col-span-3"><InfoRow label="Sponsor Address" value={applicant.sponsor_address} /></div>
+                    <div className="col-span-2 sm:col-span-3">
+                      <InfoRow label="Sponsor Address" value={applicant.sponsor_address} />
+                    </div>
                   </CardContent>
                 </Card>
               )}
               {(applicant.insurance_company || applicant.insurance_number) && (
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Insurance</CardTitle></CardHeader>
+                  <CardHeader>
+                    <CardTitle className="text-base">Insurance</CardTitle>
+                  </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4">
                     <InfoRow label="Insurance Company" value={applicant.insurance_company} />
                     <InfoRow label="Policy Number" value={applicant.insurance_number} />
@@ -825,17 +1110,38 @@ export default function ApplicantProfilePage() {
             {/* Travel */}
             <TabsContent value="travel" className="mt-4">
               <Card>
-                <CardHeader><CardTitle className="text-base">Travel Information</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="text-base">Travel Information</CardTitle>
+                </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                   <InfoRow label="Destination Country" value={applicant.destination_country} />
                   <InfoRow label="Entry Country" value={applicant.entry_country} />
                   <InfoRow label="Purpose of Travel" value={applicant.purpose_of_travel} />
-                  <InfoRow label="Arrival Date" value={applicant.arrival_date ? format(new Date(applicant.arrival_date), "MMM d, yyyy") : null} />
-                  <InfoRow label="Departure Date" value={applicant.departure_date ? format(new Date(applicant.departure_date), "MMM d, yyyy") : null} />
+                  <InfoRow
+                    label="Arrival Date"
+                    value={
+                      applicant.arrival_date
+                        ? format(new Date(applicant.arrival_date), "MMM d, yyyy")
+                        : null
+                    }
+                  />
+                  <InfoRow
+                    label="Departure Date"
+                    value={
+                      applicant.departure_date
+                        ? format(new Date(applicant.departure_date), "MMM d, yyyy")
+                        : null
+                    }
+                  />
                   <InfoRow label="Number of Entries" value={applicant.number_of_entries} />
-                  <InfoRow label="Duration of Stay" value={applicant.duration_of_stay ? `${applicant.duration_of_stay} days` : null} />
+                  <InfoRow
+                    label="Duration of Stay"
+                    value={applicant.duration_of_stay ? `${applicant.duration_of_stay} days` : null}
+                  />
                   <InfoRow label="Hotel Name" value={applicant.hotel_name} />
-                  <div className="col-span-2 sm:col-span-3"><InfoRow label="Hotel Address" value={applicant.hotel_address} /></div>
+                  <div className="col-span-2 sm:col-span-3">
+                    <InfoRow label="Hotel Address" value={applicant.hotel_address} />
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
@@ -854,7 +1160,9 @@ export default function ApplicantProfilePage() {
 
             <TabsContent value="activity" className="mt-4">
               <Card>
-                <CardHeader><CardTitle className="text-base">Activity Timeline</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="text-base">Activity Timeline</CardTitle>
+                </CardHeader>
                 <CardContent>
                   <ActivityPanel applicantId={id} />
                 </CardContent>

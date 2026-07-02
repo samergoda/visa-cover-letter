@@ -6,7 +6,7 @@ import type { Applicant } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       ids?: string[];
       includeChecklists?: boolean;
       filters?: Record<string, unknown>;
@@ -45,8 +45,7 @@ export async function POST(request: NextRequest) {
 
     return new NextResponse(buffer, {
       headers: {
-        "Content-Type":
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="applicants-${Date.now()}.xlsx"`,
       },
     });

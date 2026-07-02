@@ -29,7 +29,7 @@ export default function NewApplicantPage() {
         body: JSON.stringify(payload),
       });
 
-      const data = await res.json() as { id?: string; error?: string };
+      const data = (await res.json()) as { id?: string; error?: string };
 
       if (!res.ok) {
         toast.error(data.error ?? "Failed to submit application");
@@ -76,9 +76,7 @@ export default function NewApplicantPage() {
               {refNumber && (
                 <p className="text-sm text-muted-foreground">
                   Reference number:{" "}
-                  <span className="font-mono font-semibold text-foreground">
-                    {refNumber}
-                  </span>
+                  <span className="font-mono font-semibold text-foreground">{refNumber}</span>
                 </p>
               )}
             </div>
@@ -106,6 +104,7 @@ export default function NewApplicantPage() {
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
               submitLabel="Submit Application"
+              type="new"
             />
           </>
         )}

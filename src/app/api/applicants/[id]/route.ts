@@ -1,15 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import {
-  getApplicantById,
-  updateApplicant,
-  deleteApplicant,
-} from "@/lib/applicants";
+import { getApplicantById, updateApplicant, deleteApplicant } from "@/lib/applicants";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const applicant = await getApplicantById(id);
@@ -22,13 +15,10 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const body = await request.json() as Record<string, unknown>;
+    const body = (await request.json()) as Record<string, unknown>;
     const { performed_by, ...updates } = body;
 
     const applicant = await updateApplicant(id, updates, performed_by as string | undefined);

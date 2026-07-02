@@ -4,10 +4,7 @@ import { getVisaStatuses } from "@/lib/settings";
 
 export async function GET() {
   try {
-    const [stats, statuses] = await Promise.all([
-      getDashboardStats(),
-      getVisaStatuses(),
-    ]);
+    const [stats, statuses] = await Promise.all([getDashboardStats(), getVisaStatuses()]);
 
     // Attach color info to byStatus
     const byStatusWithColor = stats?.byStatus.map((s) => {

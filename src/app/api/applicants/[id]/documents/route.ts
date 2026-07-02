@@ -4,10 +4,7 @@ import { getApplicantDocuments, addDocument, deleteDocument } from "@/lib/applic
 import { createAdminClient } from "@/lib/supabase/server";
 import type { DocumentType } from "@/types";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const docs = await getApplicantDocuments(id);
@@ -17,10 +14,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const formData = await request.formData();
@@ -30,10 +24,7 @@ export async function POST(
     const uploadedBy = formData.get("uploaded_by") as string | null;
 
     if (!file || !documentType) {
-      return NextResponse.json(
-        { error: "file and document_type are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "file and document_type are required" }, { status: 400 });
     }
 
     // Upload to Supabase Storage
@@ -90,7 +81,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const { documentId, fileName, performedBy } = await request.json() as {
+    const { documentId, fileName, performedBy } = (await request.json()) as {
       documentId: string;
       fileName: string;
       performedBy?: string;

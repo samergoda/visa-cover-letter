@@ -2,14 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  FileText,
-  History,
-  Settings,
-  Plane,
-  Users,
-  LayoutDashboard,
-} from "lucide-react";
+import { FileText, History, Settings, Plane, Users, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navSections = [
@@ -47,9 +40,7 @@ export function Sidebar() {
         </div>
         <div>
           <p className="text-sm font-semibold leading-none">Visa Pro</p>
-          <p className="mt-1 text-xs text-muted-foreground">
-            Application Management
-          </p>
+          <p className="mt-1 text-xs text-muted-foreground">Application Management</p>
         </div>
       </div>
 
@@ -64,7 +55,8 @@ export function Sidebar() {
                 const Icon = item.icon;
                 const isActive =
                   item.href === "/applicants"
-                    ? pathname === "/applicants" || (pathname.startsWith("/applicants/") && pathname !== "/applicants/new")
+                    ? pathname === "/applicants" ||
+                      (pathname.startsWith("/applicants/") && pathname !== "/applicants/new")
                     : pathname === item.href || pathname.startsWith(item.href + "/");
 
                 return (

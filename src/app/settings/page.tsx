@@ -4,13 +4,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Save, Server } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -57,8 +51,8 @@ export default function SettingsPage() {
               API Configuration
             </CardTitle>
             <CardDescription>
-              The OpenRouter API key is read from server environment variables
-              and is never stored in the browser.
+              The OpenRouter API key is read from server environment variables and is never stored
+              in the browser.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -97,16 +91,13 @@ export default function SettingsPage() {
           <CardHeader>
             <CardTitle>AI Model</CardTitle>
             <CardDescription>
-              Choose the OpenRouter model used for cover letter generation.
-              Saved locally in your browser.
+              Choose the OpenRouter model used for cover letter generation. Saved locally in your
+              browser.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Label htmlFor="model">Model</Label>
-            <Select
-              value={model}
-              onValueChange={(value) => setModel(value as OpenRouterModel)}
-            >
+            <Select value={model} onValueChange={(value) => setModel(value as OpenRouterModel)}>
               <SelectTrigger id="model">
                 <SelectValue placeholder="Select a model" />
               </SelectTrigger>
@@ -132,9 +123,7 @@ export default function SettingsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              Default: https://openrouter.ai/api/v1
-            </p>
+            <p className="text-sm text-muted-foreground">Default: https://openrouter.ai/api/v1</p>
           </CardContent>
         </Card>
 

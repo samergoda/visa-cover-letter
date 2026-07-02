@@ -20,11 +20,7 @@ export async function createVisaStatus(
   status: Pick<VisaStatus, "name" | "color" | "order_index">
 ): Promise<VisaStatus> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
-    .from("visa_statuses")
-    .insert(status)
-    .select()
-    .single();
+  const { data, error } = await supabase.from("visa_statuses").insert(status).select().single();
 
   if (error) throw new Error(error.message);
   return data as VisaStatus;
@@ -52,9 +48,7 @@ export async function deleteVisaStatus(id: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-export async function reorderVisaStatuses(
-  orderedIds: string[]
-): Promise<void> {
+export async function reorderVisaStatuses(orderedIds: string[]): Promise<void> {
   const supabase = createAdminClient();
   await Promise.all(
     orderedIds.map((id, index) =>
@@ -110,16 +104,11 @@ export async function updateChecklistTemplate(
 
 export async function deleteChecklistTemplate(id: string): Promise<void> {
   const supabase = createAdminClient();
-  const { error } = await supabase
-    .from("checklist_templates")
-    .delete()
-    .eq("id", id);
+  const { error } = await supabase.from("checklist_templates").delete().eq("id", id);
   if (error) throw new Error(error.message);
 }
 
-export async function reorderChecklistTemplates(
-  orderedIds: string[]
-): Promise<void> {
+export async function reorderChecklistTemplates(orderedIds: string[]): Promise<void> {
   const supabase = createAdminClient();
   await Promise.all(
     orderedIds.map((id, index) =>

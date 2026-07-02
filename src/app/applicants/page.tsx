@@ -94,7 +94,7 @@ export default function ApplicantsPage() {
       }
 
       const res = await fetch(`/api/applicants?${params.toString()}`);
-      const result = await res.json() as PaginatedResult<Applicant>;
+      const result = (await res.json()) as PaginatedResult<Applicant>;
       setData(result);
     } catch {
       toast.error("Failed to load applicants");
@@ -216,9 +216,7 @@ export default function ApplicantsPage() {
     {
       accessorKey: "full_name",
       header: "Applicant Name",
-      cell: ({ row }) => (
-        <div className="font-medium">{row.original.full_name}</div>
-      ),
+      cell: ({ row }) => <div className="font-medium">{row.original.full_name}</div>,
     },
     {
       accessorKey: "passport_number",
@@ -359,17 +357,24 @@ export default function ApplicantsPage() {
             />
           </div>
 
-          <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => {
+              setStatusFilter(v);
+              setPage(1);
+            }}
+          >
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
-              {Array.isArray(statuses) && statuses?.map((s) => (
-                <SelectItem key={s.id} value={s.id}>
-                  {s.name}
-                </SelectItem>
-              ))}
+              {Array.isArray(statuses) &&
+                statuses?.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
 
@@ -385,9 +390,7 @@ export default function ApplicantsPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleExport(false)}>
-                Export All
-              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport(false)}>Export All</DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleExport(true)}
                 disabled={selectedIds.length === 0}
@@ -442,7 +445,8 @@ export default function ApplicantsPage() {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete {selectedIds.length} applicant(s)?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete all selected applicants and their data. This cannot be undone.
+                    This will permanently delete all selected applicants and their data. This cannot
+                    be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -473,7 +477,11 @@ export default function ApplicantsPage() {
                     >
                       {header.isPlaceholder ? null : (
                         <div
-                          className={header.column.getCanSort() ? "flex items-center gap-1 cursor-pointer select-none" : ""}
+                          className={
+                            header.column.getCanSort()
+                              ? "flex items-center gap-1 cursor-pointer select-none"
+                              : ""
+                          }
                           onClick={header.column.getToggleSortingHandler()}
                         >
                           {flexRender(header.column.columnDef.header, header.getContext())}
@@ -537,7 +545,8 @@ export default function ApplicantsPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {(page - 1) * 20 + 1}–{Math.min(page * 20, data?.meta?.total)} of {data?.meta?.total}
+            Showing {(page - 1) * 20 + 1}–{Math.min(page * 20, data?.meta?.total)} of{" "}
+            {data?.meta?.total}
           </p>
           <div className="flex gap-2">
             <Button

@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getApplicantNotes, addNote } from "@/lib/applicants";
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const notes = await getApplicantNotes(id);
@@ -15,22 +12,16 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const body = await request.json() as {
+    const body = (await request.json()) as {
       author: string;
       content: string;
     };
 
     if (!body.author || !body.content) {
-      return NextResponse.json(
-        { error: "author and content are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "author and content are required" }, { status: 400 });
     }
 
     const note = await addNote({ applicant_id: id, ...body }, body.author);

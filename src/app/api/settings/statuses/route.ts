@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import {
-  getVisaStatuses,
-  createVisaStatus,
-  reorderVisaStatuses,
-} from "@/lib/settings";
+import { getVisaStatuses, createVisaStatus, reorderVisaStatuses } from "@/lib/settings";
 
 export async function GET() {
   try {
@@ -17,7 +13,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json() as Record<string, unknown>;
+    const body = (await request.json()) as Record<string, unknown>;
 
     if (body.action === "reorder") {
       await reorderVisaStatuses(body.orderedIds as string[]);

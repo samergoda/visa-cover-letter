@@ -2,28 +2,12 @@
 // Existing types (cover letter generator)
 // ============================================================
 
-export type MaritalStatus =
-  | "single"
-  | "married"
-  | "divorced"
-  | "widowed"
-  | "separated";
+export type MaritalStatus = "single" | "married" | "divorced" | "widowed" | "separated";
 
 export type EmploymentType =
-  | "full-time"
-  | "part-time"
-  | "self-employed"
-  | "contract"
-  | "unemployed"
-  | "retired"
-  | "student";
+  "full-time" | "part-time" | "self-employed" | "contract" | "unemployed" | "retired" | "student";
 
-export type TripFundedBy =
-  | "self"
-  | "employer"
-  | "sponsor"
-  | "family"
-  | "other";
+export type TripFundedBy = "self" | "employer" | "sponsor" | "family" | "other";
 
 export interface ClientInformation {
   fullName: string;

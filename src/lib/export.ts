@@ -1,11 +1,4 @@
-import {
-  Document,
-  Packer,
-  Paragraph,
-  TextRun,
-  AlignmentType,
-  HeadingLevel,
-} from "docx";
+import { Document, Packer, Paragraph, TextRun, AlignmentType, HeadingLevel } from "docx";
 import { jsPDF } from "jspdf";
 
 function sanitizeFilename(name: string): string {
@@ -79,11 +72,7 @@ export async function exportToDocx(
   );
 }
 
-export function exportToPdf(
-  content: string,
-  clientName: string,
-  destinationCountry: string
-): void {
+export function exportToPdf(content: string, clientName: string, destinationCountry: string): void {
   const doc = new jsPDF({
     orientation: "portrait",
     unit: "mm",

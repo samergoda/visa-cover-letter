@@ -7,13 +7,7 @@ import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -72,9 +66,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 autoFocus
               />
-              {error ? (
-                <p className="text-xs text-destructive">{error}</p>
-              ) : null}
+              {error ? <p className="text-xs text-destructive">{error}</p> : null}
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Checking..." : "Enter"}

@@ -1,18 +1,7 @@
 "use client";
 
-import {
-  Copy,
-  Download,
-  FileDown,
-  RefreshCw,
-} from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Copy, Download, FileDown, RefreshCw } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,13 +40,9 @@ export function LetterPreview({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <CardTitle>Letter Preview</CardTitle>
-            <CardDescription>
-              Review, edit, and export the generated cover letter.
-            </CardDescription>
+            <CardDescription>Review, edit, and export the generated cover letter.</CardDescription>
           </div>
-          {content ? (
-            <Badge variant="secondary">{wordCount} words</Badge>
-          ) : null}
+          {content ? <Badge variant="secondary">{wordCount} words</Badge> : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -80,12 +65,7 @@ export function LetterPreview({
         )}
 
         <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCopy}
-            disabled={!content || isLoading}
-          >
+          <Button type="button" variant="outline" onClick={onCopy} disabled={!content || isLoading}>
             <Copy className="h-4 w-4" />
             Copy
           </Button>
@@ -95,9 +75,7 @@ export function LetterPreview({
             onClick={onRegenerate}
             disabled={isLoading || isRegenerating}
           >
-            <RefreshCw
-              className={`h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`}
-            />
+            <RefreshCw className={`h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />
             Regenerate
           </Button>
           <Button

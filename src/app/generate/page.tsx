@@ -10,21 +10,14 @@ import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ClientInfoForm } from "@/components/forms/client-info-form";
 import { LetterPreview } from "@/components/letter/letter-preview";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   clientFormSchema,
   defaultClientFormValues,
   toClientInformation,
   type ClientFormValues,
 } from "@/schemas/client-form";
-import {
-  getHistoryItem,
-  getSelectedModel,
-  saveToHistory,
-} from "@/lib/storage";
+import { getHistoryItem, getSelectedModel, saveToHistory } from "@/lib/storage";
 import { copyToClipboard, exportToDocx, exportToPdf } from "@/lib/export";
 import type { ClientInformation, GeneratedLetter } from "@/types";
 
@@ -96,9 +89,7 @@ function GeneratePageContent() {
   const generateLetter = useCallback(
     async (values: ClientFormValues | ClientInformation, isRegenerate = false) => {
       if (!apiKeyConfigured) {
-        toast.error(
-          "OpenRouter API key is not configured. Set OPENROUTER_API_KEY in .env.local"
-        );
+        toast.error("OpenRouter API key is not configured. Set OPENROUTER_API_KEY in .env.local");
         return;
       }
 
@@ -154,13 +145,9 @@ function GeneratePageContent() {
 
         saveToHistory(historyEntry);
 
-        toast.success(
-          isRegenerate ? "Cover letter regenerated" : "Cover letter generated"
-        );
+        toast.success(isRegenerate ? "Cover letter regenerated" : "Cover letter generated");
       } catch (error) {
-        toast.error(
-          error instanceof Error ? error.message : "Generation failed"
-        );
+        toast.error(error instanceof Error ? error.message : "Generation failed");
       } finally {
         setIsGenerating(false);
         setIsRegenerating(false);
@@ -195,11 +182,7 @@ function GeneratePageContent() {
     if (!letterContent || !lastClient) return;
 
     try {
-      await exportToDocx(
-        letterContent,
-        lastClient.fullName,
-        lastClient.destinationCountry
-      );
+      await exportToDocx(letterContent, lastClient.fullName, lastClient.destinationCountry);
       toast.success("DOCX downloaded");
     } catch {
       toast.error("Failed to export DOCX");
@@ -210,11 +193,7 @@ function GeneratePageContent() {
     if (!letterContent || !lastClient) return;
 
     try {
-      exportToPdf(
-        letterContent,
-        lastClient.fullName,
-        lastClient.destinationCountry
-      );
+      exportToPdf(letterContent, lastClient.fullName, lastClient.destinationCountry);
       toast.success("PDF downloaded");
     } catch {
       toast.error("Failed to export PDF");
@@ -231,14 +210,11 @@ function GeneratePageContent() {
           <CardContent className="flex items-start gap-3 p-4">
             <AlertCircle className="mt-0.5 h-5 w-5 text-destructive" />
             <div className="text-sm">
-              <p className="font-medium text-destructive">
-                OpenRouter API key not configured
-              </p>
+              <p className="font-medium text-destructive">OpenRouter API key not configured</p>
               <p className="mt-1 text-muted-foreground">
-                Add{" "}
-                <code className="rounded bg-muted px-1">OPENROUTER_API_KEY</code>{" "}
-                to your <code className="rounded bg-muted px-1">.env.local</code>{" "}
-                file and restart the server. Check Settings for status.
+                Add <code className="rounded bg-muted px-1">OPENROUTER_API_KEY</code> to your{" "}
+                <code className="rounded bg-muted px-1">.env.local</code> file and restart the
+                server. Check Settings for status.
               </p>
             </div>
           </CardContent>
@@ -255,9 +231,7 @@ function GeneratePageContent() {
               className="w-full sm:w-auto"
               disabled={isGenerating || !apiKeyConfigured}
             >
-              <Sparkles
-                className={`h-4 w-4 ${isGenerating ? "animate-pulse" : ""}`}
-              />
+              <Sparkles className={`h-4 w-4 ${isGenerating ? "animate-pulse" : ""}`} />
               {isGenerating ? "Generating..." : "Generate Cover Letter"}
             </Button>
           </div>
@@ -265,9 +239,7 @@ function GeneratePageContent() {
           <LetterPreview
             content={letterContent}
             clientName={lastClient?.fullName ?? form.watch("fullName")}
-            destinationCountry={
-              lastClient?.destinationCountry ?? form.watch("destinationCountry")
-            }
+            destinationCountry={lastClient?.destinationCountry ?? form.watch("destinationCountry")}
             isLoading={isGenerating}
             isRegenerating={isRegenerating}
             onContentChange={setLetterContent}

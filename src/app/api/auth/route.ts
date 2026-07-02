@@ -21,8 +21,8 @@ export async function POST(request: Request) {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
-    // 7-day session
-    maxAge: 60 * 60 * 24 * 7,
+    // a day session
+    maxAge: 60 * 60 * 24,
   });
 
   return response;

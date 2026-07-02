@@ -1,0 +1,205 @@
+╔══════════════════════════════════════════════════════════════════════════╗
+║                    SUPABASE SQL UPDATE - VISUAL GUIDE                    ║
+╚══════════════════════════════════════════════════════════════════════════╝
+
+STEP 1: Open Browser
+─────────────────────────────────────────────────────────────────────────────
+  🌐 Go to: https://supabase.com/dashboard
+
+  [Chrome/Firefox/Safari]
+  ┌────────────────────────────────────────────────────────────┐
+  │  https://supabase.com/dashboard                        [×] │
+  ├────────────────────────────────────────────────────────────┤
+  │                                                            │
+  │     Supabase Logo                                          │
+  │                                                            │
+  │     [Login Button] ← Click here if not logged in          │
+  └────────────────────────────────────────────────────────────┘
+
+
+STEP 2: Select Your Project
+─────────────────────────────────────────────────────────────────────────────
+  Your Projects:
+  ┌────────────────────────────────────────────────────────────┐
+  │  visa-cover-letter                                         │
+  │  eyphpixcyulwoeldxfza.supabase.co                    [→]  │ ← Click here
+  └────────────────────────────────────────────────────────────┘
+
+
+STEP 3: Find SQL Editor in Sidebar
+─────────────────────────────────────────────────────────────────────────────
+  ┌──────────────┬──────────────────────────────────────────────┐
+  │              │                                              │
+  │  🏠 Home     │                                              │
+  │  📊 Tables   │                                              │
+  │  🗄️ Database │        Your project dashboard                │
+  │  💾 Storage  │                                              │
+  │  📝 SQL      │ ← Click "SQL Editor" (or "SQL")             │
+  │  🔐 Auth     │                                              │
+  │  ⚙️ Settings │                                              │
+  │              │                                              │
+  └──────────────┴──────────────────────────────────────────────┘
+       ↑
+    Sidebar
+
+
+STEP 4: Create New Query
+─────────────────────────────────────────────────────────────────────────────
+  Top of SQL Editor:
+  ┌─────────────────────────────────────────────────────────────┐
+  │  SQL Editor               [+ New query]  [Saved queries]    │ ← Click here
+  └─────────────────────────────────────────────────────────────┘
+
+  You'll see:
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Untitled query                    [Save] [Run] [RLS ✓]    │
+  ├─────────────────────────────────────────────────────────────┤
+  │  1 │                                                         │
+  │  2 │ -- Type your SQL here                                  │
+  │  3 │                                                         │
+  │    │                                                         │
+  │    │ ← Paste the SQL here                                   │
+  │    │                                                         │
+  └─────────────────────────────────────────────────────────────┘
+
+
+STEP 5: Copy the SQL from File
+─────────────────────────────────────────────────────────────────────────────
+  Option A: Open the file in terminal
+  $ cat supabase-migration-family-visa.sql
+
+  Option B: Open in text editor
+  $ code supabase-migration-family-visa.sql
+  $ nano supabase-migration-family-visa.sql
+
+  Option C: Copy from HOW-TO-UPDATE-SUPABASE.md file
+
+
+STEP 6: Paste and Run
+─────────────────────────────────────────────────────────────────────────────
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Migration query              [Save] [RUN ⚡] [RLS ✓]       │
+  ├─────────────────────────────────────────────────────────────┤
+  │  1 │ -- Migration: Add Family Visa Fields                   │
+  │  2 │                                                         │
+  │  3 │ ALTER TABLE applicants ADD COLUMN ...                  │
+  │  4 │ ALTER TABLE applicants ADD COLUMN ...                  │
+  │ .. │ ...                                                     │
+  │    │                                                         │
+  └─────────────────────────────────────────────────────────────┘
+                                    ↑
+                              Click "RUN" button
+                          (or press Ctrl+Enter)
+
+
+STEP 7: Check Success
+─────────────────────────────────────────────────────────────────────────────
+  Bottom of SQL Editor - You should see:
+
+  ✅ SUCCESS:
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Results                                                    │
+  ├─────────────────────────────────────────────────────────────┤
+  │  ✓ Success. No rows returned                                │
+  │  Duration: 234ms                                            │
+  └─────────────────────────────────────────────────────────────┘
+
+  ❌ ERROR (if you see this):
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Results                                                    │
+  ├─────────────────────────────────────────────────────────────┤
+  │  ✗ Error: relation "applicants" does not exist              │
+  │                                                             │
+  │  → Run supabase-schema.sql first!                           │
+  └─────────────────────────────────────────────────────────────┘
+
+
+VERIFY: Check Table Columns
+─────────────────────────────────────────────────────────────────────────────
+  1. Sidebar → Click "Table Editor"
+  2. Click "applicants" table
+  3. Scroll right to see columns
+
+  You should see NEW columns:
+  ┌─────────────────────────────────────────────────────────────┐
+  │ full_name │ nationality │ ... │ is_family_visa │ spouse... │
+  ├───────────┼─────────────┼─────┼────────────────┼───────────┤
+  │ John Doe  │ Lebanese    │ ... │ false          │           │
+  └─────────────────────────────────────────────────────────────┘
+                                    ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+                                    New columns!
+
+
+VERIFY: Check Storage Bucket
+─────────────────────────────────────────────────────────────────────────────
+  1. Sidebar → Click "Storage"
+  2. Look for buckets list
+
+  You should see:
+  ┌─────────────────────────────────────────────────────────────┐
+  │  Buckets:                                                   │
+  │                                                             │
+  │  📁 applicant-documents  [Public] [0 objects]               │
+  │     ↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑                                     │
+  │     This bucket is NEW!                                     │
+  └─────────────────────────────────────────────────────────────┘
+
+
+TEST: Try Uploading a Document
+─────────────────────────────────────────────────────────────────────────────
+  Terminal:
+  $ npm run dev
+
+  Browser:
+  → Go to: http://localhost:3000/applicants/[some-id]
+  → Try uploading a document
+
+  BEFORE migration:
+  ┌─────────────────────────────────────────────────────────────┐
+  │  ❌ Error: Storage upload failed: Bucket not found          │
+  └─────────────────────────────────────────────────────────────┘
+
+  AFTER migration:
+  ┌─────────────────────────────────────────────────────────────┐
+  │  ✅ Document uploaded successfully!                         │
+  └─────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════
+                              QUICK REFERENCE
+═══════════════════════════════════════════════════════════════════════════
+
+  1. https://supabase.com/dashboard
+  2. Select project: eyphpixcyulwoeldxfza.supabase.co
+  3. Click: SQL Editor
+  4. Click: + New query
+  5. Paste: Contents of supabase-migration-family-visa.sql
+  6. Click: RUN (or Ctrl+Enter)
+  7. See: ✓ Success
+  8. Verify: Table Editor → applicants → see new columns
+  9. Verify: Storage → see applicant-documents bucket
+  10. Test: Upload a document in your app → should work!
+
+═══════════════════════════════════════════════════════════════════════════
+
+  WHAT THE SQL DOES:
+
+  ✓ Adds 7 columns to applicants table:
+    • is_family_visa (true/false)
+    • spouse_full_name
+    • spouse_date_of_birth
+    • spouse_nationality
+    • spouse_passport_number
+    • number_of_children
+    • children_info
+
+  ✓ Creates storage bucket: applicant-documents
+
+  ✓ Sets up 3 policies:
+    • Public read access
+    • Allow uploads
+    • Allow deletes
+
+═══════════════════════════════════════════════════════════════════════════
+                             ✅ YOU'RE DONE!
+═══════════════════════════════════════════════════════════════════════════

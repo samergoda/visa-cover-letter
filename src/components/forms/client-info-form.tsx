@@ -3,13 +3,7 @@
 import { useEffect } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { differenceInCalendarDays, parse, isValid } from "date-fns";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -63,9 +57,7 @@ function Field({
         {...register(name)}
       />
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
-      {error?.message ? (
-        <p className="text-xs text-destructive">{String(error.message)}</p>
-      ) : null}
+      {error?.message ? <p className="text-xs text-destructive">{String(error.message)}</p> : null}
     </div>
   );
 }
@@ -93,9 +85,7 @@ function TextAreaField({
       <Label htmlFor={name}>{label}</Label>
       <Textarea id={name} placeholder={placeholder} {...register(name)} />
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
-      {error?.message ? (
-        <p className="text-xs text-destructive">{String(error.message)}</p>
-      ) : null}
+      {error?.message ? <p className="text-xs text-destructive">{String(error.message)}</p> : null}
     </div>
   );
 }
@@ -116,16 +106,12 @@ function SwitchField({
     <div className="flex items-center justify-between rounded-lg border p-4">
       <div className="space-y-0.5">
         <Label htmlFor={name}>{label}</Label>
-        {description ? (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        ) : null}
+        {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
       </div>
       <Switch
         id={name}
         checked={value}
-        onCheckedChange={(checked) =>
-          setValue(name, checked, { shouldDirty: true })
-        }
+        onCheckedChange={(checked) => setValue(name, checked, { shouldDirty: true })}
       />
     </div>
   );
@@ -155,17 +141,11 @@ function DateField({
         control={control}
         name={name}
         render={({ field }) => (
-          <DatePicker
-            id={name}
-            value={field.value as string}
-            onChange={field.onChange}
-          />
+          <DatePicker id={name} value={field.value as string} onChange={field.onChange} />
         )}
       />
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
-      {error?.message ? (
-        <p className="text-xs text-destructive">{String(error.message)}</p>
-      ) : null}
+      {error?.message ? <p className="text-xs text-destructive">{String(error.message)}</p> : null}
     </div>
   );
 }
@@ -219,34 +199,17 @@ export function ClientInfoForm() {
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
           <Field name="fullName" label="Full Name" placeholder="John Doe" />
-          <Field
-            name="passportNumber"
-            label="Passport Number"
-            placeholder="AB1234567"
-          />
-          <Field
-            name="nationality"
-            label="Nationality"
-            placeholder="United States"
-          />
+          <Field name="passportNumber" label="Passport Number" placeholder="AB1234567" />
+          <Field name="nationality" label="Nationality" placeholder="United States" />
           <DateField name="dateOfBirth" label="Date of Birth" />
-          <Field
-            name="email"
-            label="Email Address"
-            type="email"
-            placeholder="john@example.com"
-          />
+          <Field name="email" label="Email Address" type="email" placeholder="john@example.com" />
           <Field name="phone" label="Phone Number" placeholder="+1 555 0100" />
           <Field
             name="currentAddress"
             label="Current Address"
             placeholder="123 Main Street, Apt 4B"
           />
-          <Field
-            name="cityOfResidence"
-            label="City of Residence"
-            placeholder="New York"
-          />
+          <Field name="cityOfResidence" label="City of Residence" placeholder="New York" />
           <DateField name="passportIssueDate" label="Passport Issue Date" />
           <DateField name="passportExpiryDate" label="Passport Expiry Date" />
           <div className="space-y-2 sm:col-span-2">
@@ -254,11 +217,9 @@ export function ClientInfoForm() {
             <Select
               value={maritalStatus}
               onValueChange={(value) =>
-                setValue(
-                  "maritalStatus",
-                  value as ClientFormValues["maritalStatus"],
-                  { shouldDirty: true }
-                )
+                setValue("maritalStatus", value as ClientFormValues["maritalStatus"], {
+                  shouldDirty: true,
+                })
               }
             >
               <SelectTrigger id="maritalStatus">
@@ -273,9 +234,7 @@ export function ClientInfoForm() {
               </SelectContent>
             </Select>
             {errors.maritalStatus?.message ? (
-              <p className="text-xs text-destructive">
-                {String(errors.maritalStatus.message)}
-              </p>
+              <p className="text-xs text-destructive">{String(errors.maritalStatus.message)}</p>
             ) : null}
           </div>
         </CardContent>
@@ -285,36 +244,18 @@ export function ClientInfoForm() {
       <Card>
         <CardHeader>
           <CardTitle>Travel Information</CardTitle>
-          <CardDescription>
-            Destination, visa type, dates, and planned activities.
-          </CardDescription>
+          <CardDescription>Destination, visa type, dates, and planned activities.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field
-            name="destinationCountry"
-            label="Destination Country"
-            placeholder="France"
-          />
+          <Field name="destinationCountry" label="Destination Country" placeholder="France" />
           <Field
             name="purposeOfTravel"
             label="Purpose of Travel"
             placeholder="Tourism / Business meeting"
           />
-          <Field
-            name="visaType"
-            label="Visa Type"
-            placeholder="Short-stay tourist visa"
-          />
-          <Field
-            name="embassyCity"
-            label="Embassy / Consulate City"
-            placeholder="Paris"
-          />
-          <Field
-            name="numberOfEntries"
-            label="Number of Entries"
-            placeholder="Single / Multiple"
-          />
+          <Field name="visaType" label="Visa Type" placeholder="Short-stay tourist visa" />
+          <Field name="embassyCity" label="Embassy / Consulate City" placeholder="Paris" />
+          <Field name="numberOfEntries" label="Number of Entries" placeholder="Single / Multiple" />
           <DateField name="travelStartDate" label="Travel Start Date" />
           <DateField name="travelEndDate" label="Travel End Date" />
 
@@ -331,11 +272,7 @@ export function ClientInfoForm() {
             label="Host / Inviting Organization"
             placeholder="Hotel name or business host"
           />
-          <Field
-            name="hostAddress"
-            label="Host Address"
-            placeholder="Host city and address"
-          />
+          <Field name="hostAddress" label="Host Address" placeholder="Host city and address" />
           <div className="sm:col-span-2">
             <TextAreaField
               name="itinerary"
@@ -356,16 +293,8 @@ export function ClientInfoForm() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field
-            name="occupation"
-            label="Occupation / Job Title"
-            placeholder="Software Engineer"
-          />
-          <Field
-            name="employerName"
-            label="Employer Name"
-            placeholder="Acme Corp"
-          />
+          <Field name="occupation" label="Occupation / Job Title" placeholder="Software Engineer" />
+          <Field name="employerName" label="Employer Name" placeholder="Acme Corp" />
           <Field
             name="employerAddress"
             label="Employer Address"
@@ -375,9 +304,7 @@ export function ClientInfoForm() {
             <Label htmlFor="employmentType">Employment Type</Label>
             <Select
               value={employmentType || undefined}
-              onValueChange={(value) =>
-                setValue("employmentType", value, { shouldDirty: true })
-              }
+              onValueChange={(value) => setValue("employmentType", value, { shouldDirty: true })}
             >
               <SelectTrigger id="employmentType">
                 <SelectValue placeholder="Select employment type" />
@@ -391,16 +318,8 @@ export function ClientInfoForm() {
               </SelectContent>
             </Select>
           </div>
-          <Field
-            name="monthlySalary"
-            label="Monthly Salary"
-            placeholder="USD 5,000"
-          />
-          <Field
-            name="annualIncome"
-            label="Annual Income"
-            placeholder="USD 60,000"
-          />
+          <Field name="monthlySalary" label="Monthly Salary" placeholder="USD 5,000" />
+          <Field name="annualIncome" label="Annual Income" placeholder="USD 60,000" />
           <DateField name="employmentStartDate" label="Employment Start Date" />
         </CardContent>
       </Card>
@@ -409,23 +328,15 @@ export function ClientInfoForm() {
       <Card>
         <CardHeader>
           <CardTitle>Financial Information</CardTitle>
-          <CardDescription>
-            Optional — demonstrates ability to fund the trip.
-          </CardDescription>
+          <CardDescription>Optional — demonstrates ability to fund the trip.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field
-            name="bankBalance"
-            label="Bank Balance"
-            placeholder="USD 25,000"
-          />
+          <Field name="bankBalance" label="Bank Balance" placeholder="USD 25,000" />
           <div className="space-y-2">
             <Label htmlFor="tripFundedBy">Trip Funded By</Label>
             <Select
               value={tripFundedBy || undefined}
-              onValueChange={(value) =>
-                setValue("tripFundedBy", value, { shouldDirty: true })
-              }
+              onValueChange={(value) => setValue("tripFundedBy", value, { shouldDirty: true })}
             >
               <SelectTrigger id="tripFundedBy">
                 <SelectValue placeholder="Who is paying for the trip?" />
@@ -521,14 +432,8 @@ export function ClientInfoForm() {
           <CardDescription>Supporting documents and sponsor details.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <SwitchField
-            name="hotelReservationAvailable"
-            label="Hotel Reservation Available"
-          />
-          <SwitchField
-            name="flightReservationAvailable"
-            label="Flight Reservation Available"
-          />
+          <SwitchField name="hotelReservationAvailable" label="Hotel Reservation Available" />
+          <SwitchField name="flightReservationAvailable" label="Flight Reservation Available" />
           <TextAreaField
             name="sponsorInformation"
             label="Sponsor Information"
@@ -542,8 +447,8 @@ export function ClientInfoForm() {
         <CardHeader>
           <CardTitle>Consultant Notes</CardTitle>
           <CardDescription>
-            Internal guidance for the AI — highlight what to emphasize in the
-            letter. Not shown verbatim in the final letter.
+            Internal guidance for the AI — highlight what to emphasize in the letter. Not shown
+            verbatim in the final letter.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

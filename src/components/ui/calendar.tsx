@@ -30,12 +30,9 @@ export function Calendar({
         ),
         month_grid: "w-full border-collapse space-y-1",
         weekdays: "flex",
-        weekday:
-          "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem] text-center",
+        weekday: "text-muted-foreground rounded-md w-8 font-normal text-[0.8rem] text-center",
         week: "flex w-full mt-2",
-        day: cn(
-          "relative p-0 text-center text-sm focus-within:relative focus-within:z-20"
-        ),
+        day: cn("relative p-0 text-center text-sm focus-within:relative focus-within:z-20"),
         day_button: cn(
           "h-8 w-8 p-0 font-normal rounded-md hover:bg-accent hover:text-accent-foreground inline-flex items-center justify-center cursor-pointer transition-colors",
           "aria-selected:opacity-100"
@@ -45,9 +42,9 @@ export function Calendar({
         today: "[&>button]:bg-accent [&>button]:text-accent-foreground",
         outside:
           "[&>button]:text-muted-foreground [&>button]:opacity-50 [&>button]:aria-selected:bg-accent/50 [&>button]:aria-selected:text-muted-foreground",
-        disabled: "[&>button]:text-muted-foreground [&>button]:opacity-50 [&>button]:cursor-not-allowed",
-        range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        disabled:
+          "[&>button]:text-muted-foreground [&>button]:opacity-50 [&>button]:cursor-not-allowed",
+        range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
         hidden: "invisible",
         ...classNames,
       }}

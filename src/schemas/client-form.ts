@@ -3,25 +3,25 @@ import type { ClientInformation } from "@/types";
 
 /** ISO date string YYYY-MM-DD or empty */
 const dateField = (label: string) =>
-  z.string().refine(
-    (val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val),
-    { message: `${label} must be a valid date` }
-  );
+  z.string().refine((val) => !val || /^\d{4}-\d{2}-\d{2}$/.test(val), {
+    message: `${label} must be a valid date`,
+  });
 
 const requiredDateField = (label: string) =>
-  z.string()
+  z
+    .string()
     .min(1, `${label} is required`)
-    .refine(
-      (val) => /^\d{4}-\d{2}-\d{2}$/.test(val),
-      { message: `${label} must be a valid date` }
-    );
+    .refine((val) => /^\d{4}-\d{2}-\d{2}$/.test(val), { message: `${label} must be a valid date` });
 
 export const clientFormSchema = z
   .object({
     fullName: z
       .string()
       .min(2, "Full name must be at least 2 characters")
-      .regex(/^[A-Za-z\s\-'.]+$/, "Full name may only contain letters, spaces, hyphens, and apostrophes"),
+      .regex(
+        /^[A-Za-z\s\-'.]+$/,
+        "Full name may only contain letters, spaces, hyphens, and apostrophes"
+      ),
     passportNumber: z
       .string()
       .min(5, "Passport number must be at least 5 characters")
@@ -29,27 +29,19 @@ export const clientFormSchema = z
       .regex(/^[A-Z0-9]+$/i, "Passport number may only contain letters and numbers"),
     nationality: z.string().min(2, "Nationality is required"),
     dateOfBirth: requiredDateField("Date of birth"),
-    maritalStatus: z.enum([
-      "single",
-      "married",
-      "divorced",
-      "widowed",
-      "separated",
-    ]),
+    maritalStatus: z.enum(["single", "married", "divorced", "widowed", "separated"]),
     email: z
       .string()
       .optional()
-      .refine(
-        (val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val),
-        { message: "Invalid email address" }
-      ),
+      .refine((val) => !val || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), {
+        message: "Invalid email address",
+      }),
     phone: z
       .string()
       .optional()
-      .refine(
-        (val) => !val || /^[\d\s+\-().]{7,20}$/.test(val),
-        { message: "Invalid phone number" }
-      ),
+      .refine((val) => !val || /^[\d\s+\-().]{7,20}$/.test(val), {
+        message: "Invalid phone number",
+      }),
     currentAddress: z.string().optional(),
     cityOfResidence: z.string().optional(),
     passportIssueDate: dateField("Passport issue date"),
