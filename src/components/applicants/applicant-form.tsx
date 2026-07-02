@@ -120,12 +120,10 @@ export function ApplicantForm({
   });
 
   const { register, control, formState: { errors }, handleSubmit: formHandleSubmit, watch, setValue } = form;
-  const handleSubmit = ()=>{
-    formHandleSubmit(onSubmit as never);
-    window.scroll({
-     top: 0, behavior: 'smooth'
-    })
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    await formHandleSubmit(onSubmit as never)(e);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   // Auto-calculate duration of stay from arrival/departure dates
   const arrivalDate = watch("arrival_date");
