@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   const { password } = (await request.json()) as { password?: string };
 
-  const appPassword = 'test';
+  const appPassword = process.env.APP_PASSWORD;
 
   if (!appPassword) {
     return NextResponse.json(
