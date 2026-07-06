@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import {
@@ -29,26 +28,7 @@ import {
   Pie,
   Cell,
 } from "recharts";
-
-interface DashboardData {
-  total: number;
-  waiting_documents: number;
-  submitted: number;
-  approved: number;
-  rejected: number;
-  cancelled: number;
-  passport_returned: number;
-  byStatus: { status: string; count: number; color: string }[];
-  byCountry: { country: string; count: number }[];
-  byMonth: { month: string; count: number }[];
-  recentApplicants?: {
-    id: string;
-    full_name: string;
-    destination_country: string;
-    status: string;
-    created_at: string;
-  }[];
-}
+import { useDashboard, type DashboardData } from "@/hooks/use-api";
 
 const statCards = [
   {
@@ -104,30 +84,7 @@ const statCards = [
 
 export default function DashboardPage() {
   const t = useTranslations("Dashboard");
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [, setLastUpdated] = useState<Date | null>(null);
-
-  const fetchData = () => {
-    setIsLoading(true);
-    setError(null);
-    fetch("/api/dashboard")
-      .then((res) => res.json())
-      .then((d: DashboardData) => {
-        setData(d);
-        setLastUpdated(new Date());
-        setIsLoading(false);
-      })
-      .catch(() => {
-        setError(t("failedLoad"));
-        setIsLoading(false);
-      });
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const { data, isLoading, error } = useDashboard();
 
   return (
     <DashboardLayout title={t("title")} description={t("description")}>
@@ -165,7 +122,7 @@ export default function DashboardPage() {
                   {t("inProgress")}
                 </div>
                 <div className="text-2xl font-bold text-amber-900 dark:text-amber-100">
-                  {data.waiting_documents + data.submitted}
+                  {data.waiting_documents + data.submitted || 0}
                 </div>
                 <p className="text-xs text-amber-600 dark:text-amber-400">{t("processing")}</p>
               </CardContent>
@@ -177,7 +134,7 @@ export default function DashboardPage() {
                   {t("completed")}
                 </div>
                 <div className="text-2xl font-bold text-green-900 dark:text-green-100">
-                  {data.approved + data.passport_returned}
+                  {data.approved + data.passport_returned || 0}
                 </div>
                 <p className="text-xs text-green-600 dark:text-green-400">{t("processed")}</p>
               </CardContent>
@@ -350,7 +307,7 @@ export default function DashboardPage() {
 
         {error && (
           <Card className="border-destructive/50 bg-destructive/5">
-            <CardContent className="p-4 text-sm text-destructive">{error}</CardContent>
+            <CardContent className="p-4 text-sm text-destructive">{t("failedLoad")}</CardContent>
           </Card>
         )}
       </div>

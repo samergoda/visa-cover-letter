@@ -399,5 +399,98 @@
       "exportDownloaded": "Export downloaded",
       "exportFailed": "Export failed"
     }
+  },
+  "HistoryPage": {
+    "title": "Letter History",
+    "description": "Previously generated cover letters stored locally in your browser.",
+    "savedLetters": "{count} saved letters",
+    "clearAll": "Clear All",
+    "loading": "Loading history...",
+    "noLettersTitle": "No letters yet",
+    "noLettersDescription": "Generated cover letters will appear here for quick reference.",
+    "generateFirst": "Generate your first letter",
+    "view": "View",
+    "delete": "Delete",
+    "toasts": {
+      "removed": "Letter removed from history",
+      "cleared": "History cleared"
+    }
+  },
+  "SettingsPage": {
+    "title": "Settings",
+    "description": "Configure the AI model and verify server environment.",
+    "apiConfigTitle": "API Configuration",
+    "apiConfigDescription": "The OpenRouter API key is read from server environment variables and is never stored in the browser.",
+    "apiKeyLabel": "OPENROUTER_API_KEY",
+    "apiKeyHint": "Set in .env.local",
+    "checking": "Checking...",
+    "configured": "Configured",
+    "notConfigured": "Not configured",
+    "addKeyInstructions": "Add your key to .env.local:",
+    "restartHint": "Restart the dev server after updating environment variables.",
+    "aiModelTitle": "AI Model",
+    "aiModelDescription": "Choose the OpenRouter model used for cover letter generation. Saved locally in your browser.",
+    "modelLabel": "Model",
+    "modelPlaceholder": "Select a model",
+    "environmentTitle": "Environment",
+    "environmentDescription": "Base URL is configured via NEXT_PUBLIC_OPENROUTER_BASE_URL",
+    "defaultUrl": "Default: https://openrouter.ai/api/v1",
+    "saveButton": "Save Model Preference",
+    "toasts": {
+      "saved": "Model preference saved"
+    }
+  },
+  "AdminSettings": {
+    "title": "General Settings",
+    "description": "Configure visa statuses and checklist templates.",
+    "tabs": {
+      "statuses": "Visa Statuses",
+      "checklist": "Checklist Items"
+    },
+    "statuses": {
+      "title": "Visa Statuses",
+      "description": "Create and manage the statuses applicants can be assigned. Disable a status to hide it from dropdowns without losing existing data.",
+      "addStatus": "Add Status",
+      "newStatus": "New Status",
+      "name": "Name",
+      "namePlaceholder": "e.g. Under Review",
+      "color": "Color",
+      "creating": "Creating...",
+      "create": "Create",
+      "noStatuses": "No statuses configured.",
+      "deleteTitle": "Delete \"{name}\"?",
+      "deleteDescription": "This cannot be undone. Applicants with this status will lose it.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "checklist": {
+      "title": "Checklist Templates",
+      "description": "Items in this list are automatically added to every new applicant. Reorder them using the arrows. Disabling an item removes it from future applicants only.",
+      "addItem": "Add Item",
+      "newItem": "New Checklist Item",
+      "name": "Name",
+      "namePlaceholder": "e.g. Passport Received",
+      "descriptionLabel": "Description (optional)",
+      "descriptionPlaceholder": "Short description",
+      "creating": "Creating...",
+      "create": "Create",
+      "active": "Active",
+      "disabled": "Disabled",
+      "noItems": "No checklist items configured.",
+      "deleteTitle": "Delete \"{name}\"?",
+      "deleteDescription": "This will remove the checklist item from all new applicants. Existing applicant checklists won't be affected.",
+      "cancel": "Cancel",
+      "delete": "Delete"
+    },
+    "toasts": {
+      "nameRequired": "Name is required",
+      "statusCreated": "Status created",
+      "statusUpdated": "Status updated",
+      "cannotDelete": "Cannot delete — status may be in use",
+      "statusDeleted": "Status deleted",
+      "itemCreated": "Checklist item created",
+      "itemUpdated": "Item updated",
+      "itemDeleted": "Item deleted"
+    }
   }
 }

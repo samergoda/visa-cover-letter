@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useState, useDeferredValue } from "react";
 import { Link, useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useReactTable,
   getCoreRowModel,
@@ -58,18 +59,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Applicant, VisaStatus, PaginatedResult } from "@/types";
+import { useApplicants, useStatuses } from "@/hooks/use-api";
+import type { Applicant } from "@/types";
 
 export default function ApplicantsPage() {
   const router = useRouter();
   const t = useTranslations("ApplicantsPage");
+  const queryClient = useQueryClient();
 
-  const [data, setData] = useState<PaginatedResult<Applicant>>({
-    data: [],
-    meta: { page: 1, pageSize: 20, total: 0, totalPages: 0 },
-  });
-  const [statuses, setStatuses] = useState<VisaStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
   const [sorting, setSorting] = useState<SortingState>([]);
   const [search, setSearch] = useState("");
@@ -77,55 +74,43 @@ export default function ApplicantsPage() {
   const [page, setPage] = useState(1);
   const [bulkStatusId, setBulkStatusId] = useState("");
 
+  // Debounce search with useDeferredValue
+  const deferredSearch = useDeferredValue(search);
+
   const selectedIds = Object.entries(rowSelection)
     .filter(([, v]) => v)
     .map(([k]) => k);
 
-  const fetchApplicants = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (search) params.set("search", search);
-      if (statusFilter && statusFilter !== "all") params.set("status_id", statusFilter);
-      params.set("page", String(page));
-      params.set("pageSize", "20");
-      if (sorting.length > 0) {
-        params.set("sortBy", sorting[0].id);
-        params.set("sortDir", sorting[0].desc ? "desc" : "asc");
-      }
+  const { data: statusesData } = useStatuses();
+  const statuses = Array.isArray(statusesData) ? statusesData : [];
 
-      const res = await fetch(`/api/applicants?${params.toString()}`);
-      const result = (await res.json()) as PaginatedResult<Applicant>;
-      setData(result);
-    } catch {
-      toast.error(t("toasts.failedLoad"));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [search, statusFilter, page, sorting, t]);
+  const {
+    data: applicantsData,
+    isLoading,
+    refetch: refetchApplicants,
+  } = useApplicants({
+    search: deferredSearch,
+    statusFilter,
+    page,
+    pageSize: 20,
+    sortBy: sorting.length > 0 ? sorting[0].id : undefined,
+    sortDir: sorting.length > 0 ? (sorting[0].desc ? "desc" : "asc") : undefined,
+  });
 
-  useEffect(() => {
-    fetch("/api/settings/statuses")
-      .then((r) => r.json())
-      .then((d: VisaStatus[]) => setStatuses(d))
-      .catch(() => {});
-  }, []);
+  const data = applicantsData ?? {
+    data: [],
+    meta: { page: 1, pageSize: 20, total: 0, totalPages: 0 },
+  };
 
-  useEffect(() => {
-    void fetchApplicants();
-  }, [fetchApplicants]);
-
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => fetchApplicants(), 400);
-    return () => clearTimeout(timer);
-  }, [search]); // eslint-disable-line
+  const invalidateApplicants = () => {
+    void queryClient.invalidateQueries({ queryKey: ["applicants"] });
+  };
 
   const handleDelete = async (id: string) => {
     try {
       await fetch(`/api/applicants/${id}`, { method: "DELETE" });
       toast.success(t("toasts.deleted"));
-      void fetchApplicants();
+      invalidateApplicants();
     } catch {
       toast.error(t("toasts.failedDelete"));
     }
@@ -140,7 +125,7 @@ export default function ApplicantsPage() {
       });
       toast.success(t("toasts.bulkDeleted", { count: selectedIds.length }));
       setRowSelection({});
-      void fetchApplicants();
+      invalidateApplicants();
     } catch {
       toast.error(t("toasts.failedBulkDelete"));
     }
@@ -161,7 +146,7 @@ export default function ApplicantsPage() {
       toast.success(t("toasts.bulkStatusUpdated", { count: selectedIds.length }));
       setRowSelection({});
       setBulkStatusId("");
-      void fetchApplicants();
+      invalidateApplicants();
     } catch {
       toast.error(t("toasts.failedBulkStatus"));
     }
@@ -370,16 +355,15 @@ export default function ApplicantsPage() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("allStatuses")}</SelectItem>
-              {Array.isArray(statuses) &&
-                statuses?.map((s) => (
-                  <SelectItem key={s.id} value={s.id}>
-                    {s.name}
-                  </SelectItem>
-                ))}
+              {statuses.map((s) => (
+                <SelectItem key={s.id} value={s.id}>
+                  {s.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
-          <Button variant="outline" size="icon" onClick={() => fetchApplicants()}>
+          <Button variant="outline" size="icon" onClick={() => refetchApplicants()}>
             <RefreshCw className="h-4 w-4" />
           </Button>
 

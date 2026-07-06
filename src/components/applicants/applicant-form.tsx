@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { VisaStatus } from "@/types";
+import { useStatuses } from "@/hooks/use-api";
 
 interface FieldProps {
   name: keyof ApplicantFormValues;
@@ -99,16 +100,10 @@ export function ApplicantForm({
   type = "edit",
 }: ApplicantFormProps) {
   const t = useTranslations("ApplicantForm");
-  const [statuses, setStatuses] = useState<VisaStatus[]>([]);
+  const { data: statusesData } = useStatuses();
+  const statuses = (statusesData ?? []).filter((s: VisaStatus) => s.is_active);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = type === "new" ? 4 : 5;
-
-  useEffect(() => {
-    fetch("/api/settings/statuses")
-      .then((r) => r.json())
-      .then((d: VisaStatus[]) => setStatuses(d.filter((s) => s.is_active)))
-      .catch(() => {});
-  }, []);
 
   const form = useForm<ApplicantFormValues>({
     resolver: zodResolver(applicantFormSchema) as never,

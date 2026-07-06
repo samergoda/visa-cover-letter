@@ -1,8 +1,8 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { useParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
@@ -60,6 +60,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { applicantToFormValues, type ApplicantFormValues } from "@/schemas/applicant-form";
 import { exportToDocx, exportToPdf, copyToClipboard } from "@/lib/export";
+import {
+  useApplicant,
+  useStatuses,
+  useApplicantDocuments,
+  useApplicantChecklists,
+  useApplicantNotes,
+  useApplicantActivity,
+} from "@/hooks/use-api";
 import type {
   Applicant,
   ApplicantChecklist,
@@ -87,21 +95,14 @@ function InfoRow({ label, value }: { label: string; value?: string | number | nu
 
 // ─── Documents Panel ─────────────────────────────────────────────────────────
 function DocumentsPanel({ applicantId }: { applicantId: string }) {
-  const [docs, setDocs] = useState<ApplicantDocument[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: docs = [], isLoading } = useApplicantDocuments(applicantId);
   const [uploading, setUploading] = useState(false);
   const [docType, setDocType] = useState<string>("");
 
-  const fetchDocs = useCallback(async () => {
-    const res = await fetch(`/api/applicants/${applicantId}/documents`);
-    const data = (await res.json()) as ApplicantDocument[];
-    setDocs(data);
-    setIsLoading(false);
-  }, [applicantId]);
-
-  useEffect(() => {
-    void fetchDocs();
-  }, [fetchDocs]);
+  const invalidateDocs = () => {
+    void queryClient.invalidateQueries({ queryKey: ["applicant-documents", applicantId] });
+  };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -124,7 +125,7 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
         return;
       }
       toast.success("File uploaded");
-      void fetchDocs();
+      invalidateDocs();
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -138,7 +139,7 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
       body: JSON.stringify({ documentId: doc.id, fileName: doc.file_name }),
     });
     toast.success("Document deleted");
-    void fetchDocs();
+    invalidateDocs();
   };
 
   return (
@@ -259,25 +260,15 @@ function ChecklistPanel({
   applicantId: string;
   onProgressChange: (p: number) => void;
 }) {
-  const [items, setItems] = useState<ApplicantChecklist[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: items = [], isLoading } = useApplicantChecklists(applicantId);
   const [editingNotes, setEditingNotes] = useState<Record<string, string>>({});
 
-  const fetchItems = useCallback(async () => {
-    const res = await fetch(`/api/applicants/${applicantId}/checklists`);
-    const data = (await res.json()) as ApplicantChecklist[];
-    setItems(data);
-    setIsLoading(false);
-  }, [applicantId]);
-
-  useEffect(() => {
-    void fetchItems();
-  }, [fetchItems]);
+  const invalidateChecklists = () => {
+    void queryClient.invalidateQueries({ queryKey: ["applicant-checklists", applicantId] });
+  };
 
   const handleToggle = async (item: ApplicantChecklist, checked: boolean) => {
-    setItems((prev) =>
-      prev.map((it) => (it.id === item.id ? { ...it, is_completed: checked } : it))
-    );
     const res = await fetch(`/api/applicants/${applicantId}/checklists`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -292,7 +283,7 @@ function ChecklistPanel({
         it.id === item.id ? checked : it.is_completed
       ).length;
       onProgressChange(Math.round((completed / items.length) * 100));
-      void fetchItems();
+      invalidateChecklists();
     }
   };
 
@@ -312,7 +303,7 @@ function ChecklistPanel({
       delete n[item.id];
       return n;
     });
-    void fetchItems();
+    invalidateChecklists();
   };
 
   const completed = items.filter((i) => i.is_completed).length;
@@ -406,22 +397,11 @@ function ChecklistPanel({
 
 // ─── Notes Panel ─────────────────────────────────────────────────────────────
 function NotesPanel({ applicantId }: { applicantId: string }) {
-  const [notes, setNotes] = useState<ApplicantNote[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: notes = [], isLoading } = useApplicantNotes(applicantId);
   const [author, setAuthor] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const fetchNotes = useCallback(async () => {
-    const res = await fetch(`/api/applicants/${applicantId}/notes`);
-    const data = (await res.json()) as ApplicantNote[];
-    setNotes(data);
-    setIsLoading(false);
-  }, [applicantId]);
-
-  useEffect(() => {
-    void fetchNotes();
-  }, [fetchNotes]);
 
   const handleAdd = async () => {
     if (!author.trim() || !content.trim()) {
@@ -438,7 +418,8 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
       if (res.ok) {
         toast.success("Note added");
         setContent("");
-        void fetchNotes();
+        void queryClient.invalidateQueries({ queryKey: ["applicant-notes", applicantId] });
+
       }
     } finally {
       setSubmitting(false);
@@ -505,18 +486,7 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
 
 // ─── Activity Panel ────────────────────────────────────────────────────────
 function ActivityPanel({ applicantId }: { applicantId: string }) {
-  const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`/api/applicants/${applicantId}/activity`)
-      .then((r) => r.json())
-      .then((d: ActivityLog[]) => {
-        setLogs(d);
-        setIsLoading(false);
-      })
-      .catch(() => setIsLoading(false));
-  }, [applicantId]);
+  const { data: logs = [], isLoading } = useApplicantActivity(applicantId);
 
   const actionColors: Record<string, string> = {
     applicant_created: "bg-green-500",
@@ -766,6 +736,7 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
 export default function ApplicantProfilePage() {
   const params = useParams<{ id: string; locale: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const id = params.id;
   const locale = params.locale;
   const t = useTranslations("ApplicantForm");
@@ -784,40 +755,19 @@ export default function ApplicantProfilePage() {
     separated: locale === "ar" ? "منفصل/ة" : "Separated",
   };
 
-  const [applicant, setApplicant] = useState<Applicant | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: applicant = null, isLoading } = useApplicant(id);
+  const { data: statusesData } = useStatuses();
+  const statuses = (statusesData ?? []).filter((s) => s.is_active);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [statuses, setStatuses] = useState<{ id: string; name: string; color: string }[]>([]);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
 
-  const fetchApplicant = useCallback(async () => {
-    const res = await fetch(`/api/applicants/${id}`);
-    if (!res.ok) {
-      toast.error("Applicant not found");
-      router.push("/applicants");
-      return;
-    }
-    const data = (await res.json()) as Applicant;
-    setApplicant(data);
-    setProgress(data.progress_percentage);
-    setIsLoading(false);
-  }, [id, router]);
-
-  useEffect(() => {
-    void fetchApplicant();
-  }, [fetchApplicant]);
-
-  // Fetch available statuses
-  useEffect(() => {
-    fetch("/api/settings/statuses")
-      .then((r) => r.json())
-      .then((d: { id: string; name: string; color: string; is_active: boolean }[]) =>
-        setStatuses(d.filter((s) => s.is_active))
-      )
-      .catch(() => {});
-  }, []);
+  // Sync progress from applicant data
+  const applicantProgress = applicant?.progress_percentage ?? 0;
+  if (progress !== applicantProgress && !isLoading && applicant) {
+    setProgress(applicantProgress);
+  }
 
   const handleSave = async (values: ApplicantFormValues) => {
     setIsSaving(true);
@@ -838,7 +788,7 @@ export default function ApplicantProfilePage() {
       }
       toast.success("Applicant updated");
       setIsEditing(false);
-      void fetchApplicant();
+      void queryClient.invalidateQueries({ queryKey: ["applicant", id] });
     } finally {
       setIsSaving(false);
     }
@@ -864,7 +814,7 @@ export default function ApplicantProfilePage() {
         return;
       }
       toast.success("Status updated");
-      void fetchApplicant();
+      void queryClient.invalidateQueries({ queryKey: ["applicant", id] });
     } finally {
       setIsChangingStatus(false);
     }

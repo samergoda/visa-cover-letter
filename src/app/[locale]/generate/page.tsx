@@ -21,6 +21,7 @@ import {
 import { getHistoryItem, getSelectedModel, saveToHistory } from "@/lib/storage";
 import { copyToClipboard, exportToDocx, exportToPdf } from "@/lib/export";
 import type { ClientInformation, GeneratedLetter } from "@/types";
+import { useApiConfig } from "@/hooks/use-api";
 
 export default function GeneratePage() {
   const t = useTranslations("GeneratePage");
@@ -49,16 +50,8 @@ function GeneratePageContent() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [lastClient, setLastClient] = useState<ClientInformation | null>(null);
-  const [apiKeyConfigured, setApiKeyConfigured] = useState(true);
-
-  useEffect(() => {
-    void fetch("/api/config")
-      .then((res) => res.json())
-      .then((data: { apiKeyConfigured?: boolean }) => {
-        setApiKeyConfigured(Boolean(data.apiKeyConfigured));
-      })
-      .catch(() => setApiKeyConfigured(false));
-  }, []);
+  const { data: config } = useApiConfig();
+  const apiKeyConfigured = config?.apiKeyConfigured ?? true;
 
   useEffect(() => {
     const historyId = searchParams.get("historyId");

@@ -35,7 +35,7 @@ export default function LoginPage() {
       }
 
       toast.success("Access granted");
-      router.push("/generate");
+      router.push("/dashboard");
       router.refresh();
     } catch {
       toast.error("Something went wrong. Please try again.");

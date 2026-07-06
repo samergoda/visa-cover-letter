@@ -399,5 +399,98 @@
       "exportDownloaded": "تم تحميل ملف التصدير بنجاح",
       "exportFailed": "فشلت عملية التصدير"
     }
+  },
+  "HistoryPage": {
+    "title": "سجل الرسائل",
+    "description": "رسائل التغطية المُنشأة سابقاً والمحفوظة محلياً في المتصفح.",
+    "savedLetters": "{count} رسائل محفوظة",
+    "clearAll": "مسح الكل",
+    "loading": "جاري تحميل السجل...",
+    "noLettersTitle": "لا توجد رسائل بعد",
+    "noLettersDescription": "ستظهر رسائل التغطية المُنشأة هنا كمرجع سريع.",
+    "generateFirst": "أنشئ أول رسالة",
+    "view": "عرض",
+    "delete": "حذف",
+    "toasts": {
+      "removed": "تم حذف الرسالة من السجل",
+      "cleared": "تم مسح السجل"
+    }
+  },
+  "SettingsPage": {
+    "title": "الإعدادات",
+    "description": "إعداد نموذج الذكاء الاصطناعي والتحقق من بيئة الخادم.",
+    "apiConfigTitle": "إعداد API",
+    "apiConfigDescription": "يتم قراءة مفتاح OpenRouter API من متغيرات بيئة الخادم ولا يتم تخزينه في المتصفح.",
+    "apiKeyLabel": "OPENROUTER_API_KEY",
+    "apiKeyHint": "يُعيّن في .env.local",
+    "checking": "جاري التحقق...",
+    "configured": "تم الإعداد",
+    "notConfigured": "غير مُعدّ",
+    "addKeyInstructions": "أضف مفتاحك إلى .env.local:",
+    "restartHint": "أعد تشغيل خادم التطوير بعد تحديث متغيرات البيئة.",
+    "aiModelTitle": "نموذج الذكاء الاصطناعي",
+    "aiModelDescription": "اختر نموذج OpenRouter المُستخدم لإنشاء رسائل التغطية. يُحفظ محلياً في المتصفح.",
+    "modelLabel": "النموذج",
+    "modelPlaceholder": "اختر نموذجاً",
+    "environmentTitle": "البيئة",
+    "environmentDescription": "يتم إعداد عنوان URL الأساسي عبر NEXT_PUBLIC_OPENROUTER_BASE_URL",
+    "defaultUrl": "الافتراضي: https://openrouter.ai/api/v1",
+    "saveButton": "حفظ تفضيل النموذج",
+    "toasts": {
+      "saved": "تم حفظ تفضيل النموذج"
+    }
+  },
+  "AdminSettings": {
+    "title": "الإعدادات العامة",
+    "description": "إعداد حالات التأشيرة وقوالب قائمة المهام.",
+    "tabs": {
+      "statuses": "حالات التأشيرة",
+      "checklist": "عناصر قائمة المهام"
+    },
+    "statuses": {
+      "title": "حالات التأشيرة",
+      "description": "إنشاء وإدارة الحالات التي يمكن تعيينها للمتقدمين. تعطيل حالة يخفيها من القوائم دون فقدان البيانات.",
+      "addStatus": "إضافة حالة",
+      "newStatus": "حالة جديدة",
+      "name": "الاسم",
+      "namePlaceholder": "مثلاً: قيد المراجعة",
+      "color": "اللون",
+      "creating": "جاري الإنشاء...",
+      "create": "إنشاء",
+      "noStatuses": "لم يتم إعداد حالات بعد.",
+      "deleteTitle": "حذف \"{name}\"?",
+      "deleteDescription": "لا يمكن التراجع. المتقدمون الذين لديهم هذه الحالة سيفقدونها.",
+      "cancel": "إلغاء",
+      "delete": "حذف"
+    },
+    "checklist": {
+      "title": "قوالب قائمة المهام",
+      "description": "تُضاف العناصر في هذه القائمة تلقائياً لكل متقدم جديد. أعد ترتيبها باستخدام الأسهم. تعطيل عنصر يزيله من المتقدمين المستقبليين فقط.",
+      "addItem": "إضافة عنصر",
+      "newItem": "عنصر قائمة مهام جديد",
+      "name": "الاسم",
+      "namePlaceholder": "مثلاً: تم استلام الجواز",
+      "descriptionLabel": "الوصف (اختياري)",
+      "descriptionPlaceholder": "وصف مختصر",
+      "creating": "جاري الإنشاء...",
+      "create": "إنشاء",
+      "active": "مفعّل",
+      "disabled": "معطّل",
+      "noItems": "لم يتم إعداد عناصر قائمة المهام بعد.",
+      "deleteTitle": "حذف \"{name}\"?",
+      "deleteDescription": "سيتم حذف عنصر قائمة المهام من جميع المتقدمين الجدد. لن تتأثر قوائم المتقدمين الحاليين.",
+      "cancel": "إلغاء",
+      "delete": "حذف"
+    },
+    "toasts": {
+      "nameRequired": "الاسم مطلوب",
+      "statusCreated": "تم إنشاء الحالة",
+      "statusUpdated": "تم تحديث الحالة",
+      "cannotDelete": "لا يمكن الحذف — قد تكون الحالة قيد الاستخدام",
+      "statusDeleted": "تم حذف الحالة",
+      "itemCreated": "تم إنشاء عنصر القائمة",
+      "itemUpdated": "تم تحديث العنصر",
+      "itemDeleted": "تم حذف العنصر"
+    }
   }
 }
