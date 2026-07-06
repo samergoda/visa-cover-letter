@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { Eye, Trash2 } from "lucide-react";

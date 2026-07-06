@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import { differenceInCalendarDays, parse, isValid } from "date-fns";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -117,7 +118,6 @@ function SwitchField({
   );
 }
 
-/** A date picker field wired to react-hook-form via Controller */
 function DateField({
   name,
   label,
@@ -154,13 +154,18 @@ function DateField({
 // Auto-calculate travel duration
 // ---------------------------------------------------------------------------
 
-function calcDuration(startStr: string, endStr: string): string {
+function calcDuration(
+  startStr: string,
+  endStr: string,
+  labelDays: string,
+  labelDay: string
+): string {
   if (!startStr || !endStr) return "";
   const start = parse(startStr, "yyyy-MM-dd", new Date());
   const end = parse(endStr, "yyyy-MM-dd", new Date());
   if (!isValid(start) || !isValid(end) || end < start) return "";
   const days = differenceInCalendarDays(end, start) + 1;
-  return days === 1 ? "1 day" : `${days} days`;
+  return days === 1 ? `1 ${labelDay}` : `${days} ${labelDays}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -168,6 +173,7 @@ function calcDuration(startStr: string, endStr: string): string {
 // ---------------------------------------------------------------------------
 
 export function ClientInfoForm() {
+  const t = useTranslations("ClientInfoForm");
   const {
     setValue,
     watch,
@@ -183,37 +189,65 @@ export function ClientInfoForm() {
 
   // Auto-calculate duration whenever travel dates change
   useEffect(() => {
-    const calculated = calcDuration(travelStartDate ?? "", travelEndDate ?? "");
+    const calculated = calcDuration(
+      travelStartDate ?? "",
+      travelEndDate ?? "",
+      t("travel.durationDays"),
+      t("travel.durationDay")
+    );
     setValue("duration", calculated, { shouldDirty: false });
-  }, [travelStartDate, travelEndDate, setValue]);
+  }, [travelStartDate, travelEndDate, setValue, t]);
 
   return (
     <div className="space-y-6">
       {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
-          <CardDescription>
-            Core applicant identity details required for the cover letter.
-          </CardDescription>
+          <CardTitle>{t("personal.title")}</CardTitle>
+          <CardDescription>{t("personal.description")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field name="fullName" label="Full Name" placeholder="John Doe" />
-          <Field name="passportNumber" label="Passport Number" placeholder="AB1234567" />
-          <Field name="nationality" label="Nationality" placeholder="United States" />
-          <DateField name="dateOfBirth" label="Date of Birth" />
-          <Field name="email" label="Email Address" type="email" placeholder="john@example.com" />
-          <Field name="phone" label="Phone Number" placeholder="+1 555 0100" />
+          <Field
+            name="fullName"
+            label={t("personal.fullName")}
+            placeholder={t("personal.fullNamePlaceholder")}
+          />
+          <Field
+            name="passportNumber"
+            label={t("personal.passportNumber")}
+            placeholder={t("personal.passportNumberPlaceholder")}
+          />
+          <Field
+            name="nationality"
+            label={t("personal.nationality")}
+            placeholder={t("personal.nationalityPlaceholder")}
+          />
+          <DateField name="dateOfBirth" label={t("personal.dateOfBirth")} />
+          <Field
+            name="email"
+            label={t("personal.email")}
+            type="email"
+            placeholder={t("personal.emailPlaceholder")}
+          />
+          <Field
+            name="phone"
+            label={t("personal.phone")}
+            placeholder={t("personal.phonePlaceholder")}
+          />
           <Field
             name="currentAddress"
-            label="Current Address"
-            placeholder="123 Main Street, Apt 4B"
+            label={t("personal.currentAddress")}
+            placeholder={t("personal.currentAddressPlaceholder")}
           />
-          <Field name="cityOfResidence" label="City of Residence" placeholder="New York" />
-          <DateField name="passportIssueDate" label="Passport Issue Date" />
-          <DateField name="passportExpiryDate" label="Passport Expiry Date" />
+          <Field
+            name="cityOfResidence"
+            label={t("personal.cityOfResidence")}
+            placeholder={t("personal.cityOfResidencePlaceholder")}
+          />
+          <DateField name="passportIssueDate" label={t("personal.passportIssueDate")} />
+          <DateField name="passportExpiryDate" label={t("personal.passportExpiryDate")} />
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="maritalStatus">Marital Status</Label>
+            <Label htmlFor="maritalStatus">{t("personal.maritalStatus")}</Label>
             <Select
               value={maritalStatus}
               onValueChange={(value) =>
@@ -223,14 +257,14 @@ export function ClientInfoForm() {
               }
             >
               <SelectTrigger id="maritalStatus">
-                <SelectValue placeholder="Select marital status" />
+                <SelectValue placeholder={t("personal.selectMaritalStatus")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="single">Single</SelectItem>
-                <SelectItem value="married">Married</SelectItem>
-                <SelectItem value="divorced">Divorced</SelectItem>
-                <SelectItem value="widowed">Widowed</SelectItem>
-                <SelectItem value="separated">Separated</SelectItem>
+                <SelectItem value="single">{t("personal.statusSingle")}</SelectItem>
+                <SelectItem value="married">{t("personal.statusMarried")}</SelectItem>
+                <SelectItem value="divorced">{t("personal.statusDivorced")}</SelectItem>
+                <SelectItem value="widowed">{t("personal.statusWidowed")}</SelectItem>
+                <SelectItem value="separated">{t("personal.statusSeparated")}</SelectItem>
               </SelectContent>
             </Select>
             {errors.maritalStatus?.message ? (
@@ -243,42 +277,62 @@ export function ClientInfoForm() {
       {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Travel Information</CardTitle>
-          <CardDescription>Destination, visa type, dates, and planned activities.</CardDescription>
+          <CardTitle>{t("travel.title")}</CardTitle>
+          <CardDescription>{t("travel.description")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field name="destinationCountry" label="Destination Country" placeholder="France" />
+          <Field
+            name="destinationCountry"
+            label={t("travel.destinationCountry")}
+            placeholder={t("travel.destinationCountryPlaceholder")}
+          />
           <Field
             name="purposeOfTravel"
-            label="Purpose of Travel"
-            placeholder="Tourism / Business meeting"
+            label={t("travel.purposeOfTravel")}
+            placeholder={t("travel.purposeOfTravelPlaceholder")}
           />
-          <Field name="visaType" label="Visa Type" placeholder="Short-stay tourist visa" />
-          <Field name="embassyCity" label="Embassy / Consulate City" placeholder="Paris" />
-          <Field name="numberOfEntries" label="Number of Entries" placeholder="Single / Multiple" />
-          <DateField name="travelStartDate" label="Travel Start Date" />
-          <DateField name="travelEndDate" label="Travel End Date" />
+          <Field
+            name="visaType"
+            label={t("travel.visaType")}
+            placeholder={t("travel.visaTypePlaceholder")}
+          />
+          <Field
+            name="embassyCity"
+            label={t("travel.embassyCity")}
+            placeholder={t("travel.embassyCityPlaceholder")}
+          />
+          <Field
+            name="numberOfEntries"
+            label={t("travel.numberOfEntries")}
+            placeholder={t("travel.numberOfEntriesPlaceholder")}
+          />
+          <DateField name="travelStartDate" label={t("travel.travelStartDate")} />
+          <DateField name="travelEndDate" label={t("travel.travelEndDate")} />
 
           {/* Auto-calculated duration */}
           <Field
             name="duration"
-            label="Duration (auto-calculated)"
+            label={t("travel.duration")}
             readOnly
-            hint="Calculated automatically from the travel dates above."
+            hint={t("travel.durationHint")}
           />
 
           <Field
             name="hostName"
-            label="Host / Inviting Organization"
-            placeholder="Hotel name or business host"
+            label={t("travel.hostName")}
+            placeholder={t("travel.hostNamePlaceholder")}
           />
-          <Field name="hostAddress" label="Host Address" placeholder="Host city and address" />
+          <Field
+            name="hostAddress"
+            label={t("travel.hostAddress")}
+            placeholder={t("travel.hostAddressPlaceholder")}
+          />
           <div className="sm:col-span-2">
             <TextAreaField
               name="itinerary"
-              label="Travel Itinerary"
-              placeholder="Day-by-day plan, cities to visit, meetings scheduled..."
-              hint="Helps the letter explain the trip structure clearly."
+              label={t("travel.itinerary")}
+              placeholder={t("travel.itineraryPlaceholder")}
+              hint={t("travel.itineraryHint")}
             />
           </div>
         </CardContent>
@@ -287,64 +341,82 @@ export function ClientInfoForm() {
       {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Employment Information</CardTitle>
-          <CardDescription>
-            Optional — strengthens ties and financial stability arguments.
-          </CardDescription>
+          <CardTitle>{t("employment.title")}</CardTitle>
+          <CardDescription>{t("employment.description")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field name="occupation" label="Occupation / Job Title" placeholder="Software Engineer" />
-          <Field name="employerName" label="Employer Name" placeholder="Acme Corp" />
+          <Field
+            name="occupation"
+            label={t("employment.occupation")}
+            placeholder={t("employment.occupationPlaceholder")}
+          />
+          <Field
+            name="employerName"
+            label={t("employment.employerName")}
+            placeholder={t("employment.employerNamePlaceholder")}
+          />
           <Field
             name="employerAddress"
-            label="Employer Address"
-            placeholder="Company city and address"
+            label={t("employment.employerAddress")}
+            placeholder={t("employment.employerAddressPlaceholder")}
           />
           <div className="space-y-2">
-            <Label htmlFor="employmentType">Employment Type</Label>
+            <Label htmlFor="employmentType">{t("employment.employmentType")}</Label>
             <Select
               value={employmentType || undefined}
               onValueChange={(value) => setValue("employmentType", value, { shouldDirty: true })}
             >
               <SelectTrigger id="employmentType">
-                <SelectValue placeholder="Select employment type" />
+                <SelectValue placeholder={t("employment.selectEmploymentType")} />
               </SelectTrigger>
               <SelectContent>
                 {EMPLOYMENT_TYPES.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                    {t(`employment.types.${option.value}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          <Field name="monthlySalary" label="Monthly Salary" placeholder="USD 5,000" />
-          <Field name="annualIncome" label="Annual Income" placeholder="USD 60,000" />
-          <DateField name="employmentStartDate" label="Employment Start Date" />
+          <Field
+            name="monthlySalary"
+            label={t("employment.monthlySalary")}
+            placeholder={t("employment.monthlySalaryPlaceholder")}
+          />
+          <Field
+            name="annualIncome"
+            label={t("employment.annualIncome")}
+            placeholder={t("employment.annualIncomePlaceholder")}
+          />
+          <DateField name="employmentStartDate" label={t("employment.employmentStartDate")} />
         </CardContent>
       </Card>
 
       {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Financial Information</CardTitle>
-          <CardDescription>Optional — demonstrates ability to fund the trip.</CardDescription>
+          <CardTitle>{t("financial.title")}</CardTitle>
+          <CardDescription>{t("financial.description")}</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-2">
-          <Field name="bankBalance" label="Bank Balance" placeholder="USD 25,000" />
+          <Field
+            name="bankBalance"
+            label={t("financial.bankBalance")}
+            placeholder={t("financial.bankBalancePlaceholder")}
+          />
           <div className="space-y-2">
-            <Label htmlFor="tripFundedBy">Trip Funded By</Label>
+            <Label htmlFor="tripFundedBy">{t("financial.tripFundedBy")}</Label>
             <Select
               value={tripFundedBy || undefined}
               onValueChange={(value) => setValue("tripFundedBy", value, { shouldDirty: true })}
             >
               <SelectTrigger id="tripFundedBy">
-                <SelectValue placeholder="Who is paying for the trip?" />
+                <SelectValue placeholder={t("financial.fundedByPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {TRIP_FUNDED_BY_OPTIONS.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                    {t(`financial.fundedByOptions.${option.value}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -352,14 +424,14 @@ export function ClientInfoForm() {
           </div>
           <Field
             name="otherAssets"
-            label="Other Assets"
-            placeholder="Property, investments, vehicle ownership"
+            label={t("financial.otherAssets")}
+            placeholder={t("financial.otherAssetsPlaceholder")}
           />
           <div className="sm:col-span-2">
             <SwitchField
               name="travelInsuranceAvailable"
-              label="Travel Insurance Available"
-              description="Medical/travel insurance purchased for this trip"
+              label={t("financial.travelInsuranceAvailable")}
+              description={t("financial.travelInsuranceDescription")}
             />
           </div>
         </CardContent>
@@ -368,36 +440,36 @@ export function ClientInfoForm() {
       {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Travel History</CardTitle>
-          <CardDescription>Optional — past travel and visa record.</CardDescription>
+          <CardTitle>{t("history.title")}</CardTitle>
+          <CardDescription>{t("history.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <SwitchField
             name="previousVisas"
-            label="Previous Visas"
-            description="Has the applicant held visas before?"
+            label={t("history.previousVisas")}
+            description={t("history.previousVisasDescription")}
           />
           <TextAreaField
             name="countriesVisited"
-            label="Countries Visited"
-            placeholder="United Kingdom, Germany, Japan"
+            label={t("history.countriesVisited")}
+            placeholder={t("history.countriesVisitedPlaceholder")}
           />
           <Field
             name="schengenVisasHeld"
-            label="Schengen Visas Held"
-            placeholder="e.g. France 2023, Germany 2024"
+            label={t("history.schengenVisasHeld")}
+            placeholder={t("history.schengenVisasHeldPlaceholder")}
           />
           <SwitchField
             name="previousVisaRefusals"
-            label="Previous Visa Refusals"
-            description="Has the applicant ever been refused a visa?"
+            label={t("history.previousVisaRefusals")}
+            description={t("history.previousVisaRefusalsDescription")}
           />
           {previousVisaRefusals ? (
             <TextAreaField
               name="previousVisaRefusalDetails"
-              label="Refusal Details"
-              placeholder="Country, year, and brief context if known"
-              hint="Only include facts provided by the client."
+              label={t("history.refusalDetails")}
+              placeholder={t("history.refusalDetailsPlaceholder")}
+              hint={t("history.refusalDetailsHint")}
             />
           ) : null}
         </CardContent>
@@ -406,21 +478,19 @@ export function ClientInfoForm() {
       {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Home Country Ties</CardTitle>
-          <CardDescription>
-            Optional — helps demonstrate intent to return after the trip.
-          </CardDescription>
+          <CardTitle>{t("ties.title")}</CardTitle>
+          <CardDescription>{t("ties.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <TextAreaField
             name="familyTiesHomeCountry"
-            label="Family Ties in Home Country"
-            placeholder="Spouse, children, parents residing in home country"
+            label={t("ties.familyTies")}
+            placeholder={t("ties.familyTiesPlaceholder")}
           />
           <TextAreaField
             name="reasonToReturn"
-            label="Reason to Return Home"
-            placeholder="Ongoing employment, property, studies, family responsibilities"
+            label={t("ties.reasonToReturn")}
+            placeholder={t("ties.reasonToReturnPlaceholder")}
           />
         </CardContent>
       </Card>
@@ -428,16 +498,22 @@ export function ClientInfoForm() {
       {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Reservations &amp; Sponsorship</CardTitle>
-          <CardDescription>Supporting documents and sponsor details.</CardDescription>
+          <CardTitle>{t("reservations.title")}</CardTitle>
+          <CardDescription>{t("reservations.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <SwitchField name="hotelReservationAvailable" label="Hotel Reservation Available" />
-          <SwitchField name="flightReservationAvailable" label="Flight Reservation Available" />
+          <SwitchField
+            name="hotelReservationAvailable"
+            label={t("reservations.hotelReservation")}
+          />
+          <SwitchField
+            name="flightReservationAvailable"
+            label={t("reservations.flightReservation")}
+          />
           <TextAreaField
             name="sponsorInformation"
-            label="Sponsor Information"
-            placeholder="Sponsor name, relationship, and support details"
+            label={t("reservations.sponsorInformation")}
+            placeholder={t("reservations.sponsorInformationPlaceholder")}
           />
         </CardContent>
       </Card>
@@ -445,23 +521,20 @@ export function ClientInfoForm() {
       {/* ------------------------------------------------------------------ */}
       <Card>
         <CardHeader>
-          <CardTitle>Consultant Notes</CardTitle>
-          <CardDescription>
-            Internal guidance for the AI — highlight what to emphasize in the letter. Not shown
-            verbatim in the final letter.
-          </CardDescription>
+          <CardTitle>{t("notes.title")}</CardTitle>
+          <CardDescription>{t("notes.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <TextAreaField
             name="consultantNotes"
-            label="Visa Consultant Guidance"
-            placeholder="e.g. Emphasize stable employment and return to minor children. Client is attending a conference then sightseeing."
-            hint="Use this to steer tone and focus — the AI will only use facts from other fields."
+            label={t("notes.consultantGuidance")}
+            placeholder={t("notes.consultantGuidancePlaceholder")}
+            hint={t("notes.consultantGuidanceHint")}
           />
           <TextAreaField
             name="additionalNotes"
-            label="Additional Client Notes"
-            placeholder="Any other verified facts relevant for the embassy"
+            label={t("notes.additionalNotes")}
+            placeholder={t("notes.additionalNotesPlaceholder")}
           />
         </CardContent>
       </Card>

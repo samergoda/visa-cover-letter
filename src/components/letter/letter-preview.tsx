@@ -1,6 +1,7 @@
 "use client";
 
 import { Copy, Download, FileDown, RefreshCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -32,6 +33,7 @@ export function LetterPreview({
   onExportDocx,
   onExportPdf,
 }: LetterPreviewProps) {
+  const t = useTranslations("LetterPreview");
   const wordCount = content.trim() ? content.trim().split(/\s+/).length : 0;
 
   return (
@@ -39,10 +41,10 @@ export function LetterPreview({
       <CardHeader>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <CardTitle>Letter Preview</CardTitle>
-            <CardDescription>Review, edit, and export the generated cover letter.</CardDescription>
+            <CardTitle>{t("title")}</CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </div>
-          {content ? <Badge variant="secondary">{wordCount} words</Badge> : null}
+          {content ? <Badge variant="secondary">{t("words", { count: wordCount })}</Badge> : null}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -59,7 +61,7 @@ export function LetterPreview({
           <Textarea
             value={content}
             onChange={(event) => onContentChange(event.target.value)}
-            placeholder="Your generated cover letter will appear here..."
+            placeholder={t("placeholder")}
             className="min-h-[420px] resize-y font-serif leading-relaxed"
           />
         )}
@@ -67,7 +69,7 @@ export function LetterPreview({
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="outline" onClick={onCopy} disabled={!content || isLoading}>
             <Copy className="h-4 w-4" />
-            Copy
+            {t("copy")}
           </Button>
           <Button
             type="button"
@@ -76,7 +78,7 @@ export function LetterPreview({
             disabled={isLoading || isRegenerating}
           >
             <RefreshCw className={`h-4 w-4 ${isRegenerating ? "animate-spin" : ""}`} />
-            Regenerate
+            {t("regenerate")}
           </Button>
           <Button
             type="button"
@@ -85,7 +87,7 @@ export function LetterPreview({
             disabled={!content || isLoading}
           >
             <FileDown className="h-4 w-4" />
-            DOCX
+            {t("docx")}
           </Button>
           <Button
             type="button"
@@ -94,13 +96,13 @@ export function LetterPreview({
             disabled={!content || isLoading}
           >
             <Download className="h-4 w-4" />
-            PDF
+            {t("pdf")}
           </Button>
         </div>
 
         {clientName && destinationCountry ? (
           <p className="text-xs text-muted-foreground">
-            Applicant: {clientName} · Destination: {destinationCountry}
+            {t("details", { name: clientName, country: destinationCountry })}
           </p>
         ) : null}
       </CardContent>

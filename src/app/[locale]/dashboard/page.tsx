@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import {
   Users,
   FileCheck2,
@@ -11,7 +12,6 @@ import {
   Stamp,
   TrendingUp,
   Plus,
-  RefreshCw,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +28,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  Legend,
 } from "recharts";
 
 interface DashboardData {
@@ -54,60 +53,61 @@ interface DashboardData {
 const statCards = [
   {
     key: "total" as keyof DashboardData,
-    label: "Total Applicants",
+    labelKey: "totalApplicants",
     icon: Users,
     color: "text-blue-500",
     bg: "bg-blue-50 dark:bg-blue-950",
   },
   {
     key: "waiting_documents" as keyof DashboardData,
-    label: "Waiting Documents",
+    labelKey: "waitingDocuments",
     icon: FileCheck2,
     color: "text-amber-500",
     bg: "bg-amber-50 dark:bg-amber-950",
   },
   {
     key: "submitted" as keyof DashboardData,
-    label: "Submitted",
+    labelKey: "submitted",
     icon: Send,
     color: "text-cyan-500",
     bg: "bg-cyan-50 dark:bg-cyan-950",
   },
   {
     key: "approved" as keyof DashboardData,
-    label: "Approved",
+    labelKey: "approved",
     icon: CheckCircle2,
     color: "text-green-500",
     bg: "bg-green-50 dark:bg-green-950",
   },
   {
     key: "rejected" as keyof DashboardData,
-    label: "Rejected",
+    labelKey: "rejected",
     icon: XCircle,
     color: "text-red-500",
     bg: "bg-red-50 dark:bg-red-950",
   },
   {
     key: "cancelled" as keyof DashboardData,
-    label: "Cancelled",
+    labelKey: "cancelled",
     icon: XCircle,
     color: "text-gray-500",
     bg: "bg-gray-50 dark:bg-gray-950",
   },
   {
     key: "passport_returned" as keyof DashboardData,
-    label: "Passport Returned",
+    labelKey: "passportReturned",
     icon: Stamp,
     color: "text-lime-500",
     bg: "bg-lime-50 dark:bg-lime-950",
   },
-];
+] as const;
 
 export default function DashboardPage() {
+  const t = useTranslations("Dashboard");
   const [data, setData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [, setLastUpdated] = useState<Date | null>(null);
 
   const fetchData = () => {
     setIsLoading(true);
@@ -120,7 +120,7 @@ export default function DashboardPage() {
         setIsLoading(false);
       })
       .catch(() => {
-        setError("Failed to load dashboard data");
+        setError(t("failedLoad"));
         setIsLoading(false);
       });
   };
@@ -130,14 +130,14 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <DashboardLayout title="Dashboard" description="Overview of all Schengen visa applications.">
+    <DashboardLayout title={t("title")} description={t("description")}>
       <div className="space-y-6">
         {/* Quick Actions */}
         <div className="flex justify-end items-center gap-3">
           <Button asChild>
             <Link href="/applicants/new">
               <Plus className="h-4 w-4" />
-              New Applicant
+              {t("newApplicant")}
             </Link>
           </Button>
         </div>
@@ -148,13 +148,13 @@ export default function DashboardPage() {
             <Card className="bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
               <CardContent className="p-4">
                 <div className="text-sm font-medium text-blue-700 dark:text-blue-300">
-                  Success Rate
+                  {t("successRate")}
                 </div>
                 <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
                   {data.total > 0 ? Math.round((data.approved / data.total) * 100) : 0}%
                 </div>
                 <p className="text-xs text-blue-600 dark:text-blue-400">
-                  {data.approved} approved of {data.total} total
+                  {t("approvedOf", { approved: data.approved, total: data.total })}
                 </p>
               </CardContent>
             </Card>
@@ -162,36 +162,36 @@ export default function DashboardPage() {
             <Card className="bg-linear-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900">
               <CardContent className="p-4">
                 <div className="text-sm font-medium text-amber-700 dark:text-amber-300">
-                  In Progress
+                  {t("inProgress")}
                 </div>
                 <div className="text-2xl font-bold text-amber-900 dark:text-amber-100">
                   {data.waiting_documents + data.submitted}
                 </div>
-                <p className="text-xs text-amber-600 dark:text-amber-400">
-                  Applications being processed
-                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-400">{t("processing")}</p>
               </CardContent>
             </Card>
 
             <Card className="bg-linear-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
               <CardContent className="p-4">
                 <div className="text-sm font-medium text-green-700 dark:text-green-300">
-                  Completed
+                  {t("completed")}
                 </div>
                 <div className="text-2xl font-bold text-green-900 dark:text-green-100">
                   {data.approved + data.passport_returned}
                 </div>
-                <p className="text-xs text-green-600 dark:text-green-400">Successfully processed</p>
+                <p className="text-xs text-green-600 dark:text-green-400">{t("processed")}</p>
               </CardContent>
             </Card>
 
             <Card className="bg-linear-to-br from-red-50 to-red-100 dark:from-red-950 dark:to-red-900">
               <CardContent className="p-4">
-                <div className="text-sm font-medium text-red-700 dark:text-red-300">Issues</div>
+                <div className="text-sm font-medium text-red-700 dark:text-red-300">
+                  {t("issues")}
+                </div>
                 <div className="text-2xl font-bold text-red-900 dark:text-red-100">
                   {data.rejected + data.cancelled || 0}
                 </div>
-                <p className="text-xs text-red-600 dark:text-red-400">Rejected or cancelled</p>
+                <p className="text-xs text-red-600 dark:text-red-400">{t("issuesDesc")}</p>
               </CardContent>
             </Card>
           </div>
@@ -199,7 +199,7 @@ export default function DashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {statCards.map(({ key, label, icon: Icon, color, bg }) => (
+          {statCards.map(({ key, labelKey, icon: Icon, color, bg }) => (
             <Card key={key}>
               <CardContent className="flex items-center gap-4 p-6">
                 <div
@@ -208,7 +208,7 @@ export default function DashboardPage() {
                   <Icon className={`h-6 w-6 ${color}`} />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{label}</p>
+                  <p className="text-sm text-muted-foreground">{t(labelKey)}</p>
                   {isLoading ? (
                     <Skeleton className="mt-1 h-7 w-16" />
                   ) : (
@@ -223,8 +223,8 @@ export default function DashboardPage() {
         {/* Recent Applicants */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Applications</CardTitle>
-            <CardDescription>Last 5 applicants added to the system</CardDescription>
+            <CardTitle>{t("recentApplications")}</CardTitle>
+            <CardDescription>{t("recentDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
@@ -234,9 +234,7 @@ export default function DashboardPage() {
                 ))}
               </div>
             ) : !data?.recentApplicants?.length ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                No recent applications
-              </p>
+              <p className="py-6 text-center text-sm text-muted-foreground">{t("noRecent")}</p>
             ) : (
               <div className="space-y-2">
                 {data.recentApplicants.map((applicant) => (
@@ -268,16 +266,14 @@ export default function DashboardPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4" />
-                Applications by Month
+                {t("byMonth")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <Skeleton className="h-56 w-full" />
               ) : !data?.byMonth?.length ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  No data available yet
-                </p>
+                <p className="py-8 text-center text-sm text-muted-foreground">{t("noData")}</p>
               ) : (
                 <ResponsiveContainer width="100%" height={220}>
                   <BarChart data={data.byMonth}>
@@ -294,15 +290,13 @@ export default function DashboardPage() {
           {/* Status Distribution */}
           <Card>
             <CardHeader>
-              <CardTitle>Visa Status Distribution</CardTitle>
+              <CardTitle>{t("statusDistribution")}</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <Skeleton className="h-56 w-full" />
               ) : !data?.byStatus?.length ? (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  No data available yet
-                </p>
+                <p className="py-8 text-center text-sm text-muted-foreground">{t("noData")}</p>
               ) : (
                 <ResponsiveContainer width="100%" height={220}>
                   <PieChart>
@@ -333,16 +327,14 @@ export default function DashboardPage() {
         {/* Top Destinations */}
         <Card>
           <CardHeader>
-            <CardTitle>Applications by Destination Country</CardTitle>
-            <CardDescription>Top 10 destination countries</CardDescription>
+            <CardTitle>{t("byCountry")}</CardTitle>
+            <CardDescription>{t("byCountryDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             {isLoading ? (
               <Skeleton className="h-48 w-full" />
             ) : !data?.byCountry?.length ? (
-              <p className="py-6 text-center text-sm text-muted-foreground">
-                No data available yet
-              </p>
+              <p className="py-6 text-center text-sm text-muted-foreground">{t("noData")}</p>
             ) : (
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={data.byCountry} layout="vertical">

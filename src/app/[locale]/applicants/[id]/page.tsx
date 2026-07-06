@@ -2,7 +2,9 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -25,7 +27,6 @@ import {
   Download,
   FileDown,
 } from "lucide-react";
-import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ApplicantForm } from "@/components/applicants/applicant-form";
 import { StatusBadge } from "@/components/applicants/status-badge";
@@ -763,9 +764,25 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ApplicantProfilePage() {
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ id: string; locale: string }>();
   const router = useRouter();
   const id = params.id;
+  const locale = params.locale;
+  const t = useTranslations("ApplicantForm");
+
+  const genderMap: Record<string, string> = {
+    male: locale === "ar" ? "ذكر" : "Male",
+    female: locale === "ar" ? "أنثى" : "Female",
+    other: locale === "ar" ? "آخر" : "Other",
+  };
+
+  const maritalStatusMap: Record<string, string> = {
+    single: locale === "ar" ? "عازب/ة" : "Single",
+    married: locale === "ar" ? "متزوج/ة" : "Married",
+    divorced: locale === "ar" ? "مطلق/ة" : "Divorced",
+    widowed: locale === "ar" ? "أرمل/ة" : "Widowed",
+    separated: locale === "ar" ? "منفصل/ة" : "Separated",
+  };
 
   const [applicant, setApplicant] = useState<Applicant | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -997,31 +1014,31 @@ export default function ApplicantProfilePage() {
             <TabsList className="flex-wrap h-auto gap-1">
               <TabsTrigger value="info">
                 <User className="mr-1.5 h-4 w-4" />
-                Personal
+                {t("steps.personal") || "Personal"}
               </TabsTrigger>
               <TabsTrigger value="travel">
                 <Plane className="mr-1.5 h-4 w-4" />
-                Travel
+                {t("steps.travel") || "Travel"}
               </TabsTrigger>
               <TabsTrigger value="documents">
                 <FileText className="mr-1.5 h-4 w-4" />
-                Documents
+                {locale === "ar" ? "المستندات" : "Documents"}
               </TabsTrigger>
               <TabsTrigger value="checklist">
                 <CheckSquare className="mr-1.5 h-4 w-4" />
-                Checklist
+                {locale === "ar" ? "قائمة المهام" : "Checklist"}
               </TabsTrigger>
               <TabsTrigger value="notes">
                 <MessageSquarePlus className="mr-1.5 h-4 w-4" />
-                Notes
+                {locale === "ar" ? "ملاحظات" : "Notes"}
               </TabsTrigger>
               <TabsTrigger value="activity">
                 <Activity className="mr-1.5 h-4 w-4" />
-                Activity
+                {locale === "ar" ? "النشاطات" : "Activity"}
               </TabsTrigger>
               <TabsTrigger value="cover-letter">
                 <Wand2 className="mr-1.5 h-4 w-4" />
-                Cover Letter
+                {locale === "ar" ? "رسالة التغطية" : "Cover Letter"}
               </TabsTrigger>
             </TabsList>
 
@@ -1029,40 +1046,96 @@ export default function ApplicantProfilePage() {
             <TabsContent value="info" className="mt-4 space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Personal Information</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("personal.title") || "Personal Information"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  <InfoRow label="Full Name" value={applicant.full_name} />
-                  <InfoRow label="Nationality" value={applicant.nationality} />
-                  <InfoRow label="Gender" value={applicant.gender} />
                   <InfoRow
-                    label="Date of Birth"
+                    label={t("personal.fullName") || "Full Name"}
+                    value={applicant.full_name}
+                  />
+                  <InfoRow
+                    label={t("personal.nationality") || "Nationality"}
+                    value={applicant.nationality}
+                  />
+                  <InfoRow
+                    label={t("personal.gender") || "Gender"}
+                    value={
+                      applicant.gender ? genderMap[applicant.gender] || applicant.gender : null
+                    }
+                  />
+                  <InfoRow
+                    label={t("personal.dateOfBirth") || "Date of Birth"}
                     value={
                       applicant.date_of_birth
                         ? format(new Date(applicant.date_of_birth), "MMM d, yyyy")
                         : null
                     }
                   />
-                  <InfoRow label="Place of Birth" value={applicant.place_of_birth} />
-                  <InfoRow label="Marital Status" value={applicant.marital_status} />
-                  <InfoRow label="Occupation" value={applicant.occupation} />
-                  <InfoRow label="Employer" value={applicant.employer} />
-                  <InfoRow label="Phone" value={applicant.phone} />
-                  <InfoRow label="Email" value={applicant.email} />
+                  <InfoRow
+                    label={t("personal.placeOfBirth") || "Place of Birth"}
+                    value={applicant.place_of_birth}
+                  />
+                  <InfoRow
+                    label={t("personal.maritalStatus") || "Marital Status"}
+                    value={
+                      applicant.marital_status
+                        ? maritalStatusMap[applicant.marital_status] || applicant.marital_status
+                        : null
+                    }
+                  />
+                  <InfoRow
+                    label={t("personal.occupation") || "Occupation"}
+                    value={applicant.occupation}
+                  />
+                  <InfoRow
+                    label={t("personal.employer") || "Employer"}
+                    value={applicant.employer}
+                  />
+                  <InfoRow label={t("personal.phone") || "Phone Number"} value={applicant.phone} />
+                  <InfoRow label={t("personal.email") || "Email"} value={applicant.email} />
+                  <InfoRow label={t("personal.city") || "City"} value={applicant.city} />
+                  <InfoRow
+                    label={t("personal.hasBankAccount") || "Active Bank Account"}
+                    value={
+                      applicant.has_bank_account !== undefined &&
+                      applicant.has_bank_account !== null
+                        ? applicant.has_bank_account
+                          ? locale === "ar"
+                            ? "نعم"
+                            : "Yes"
+                          : locale === "ar"
+                            ? "لا"
+                            : "No"
+                        : "—"
+                    }
+                  />
                   <div className="col-span-2 sm:col-span-3">
-                    <InfoRow label="Home Address" value={applicant.home_address} />
+                    <InfoRow
+                      label={t("personal.homeAddress") || "Home Address"}
+                      value={applicant.home_address}
+                    />
                   </div>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Passport Details</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("passport.title") || "Passport Details"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  <InfoRow label="Passport Number" value={applicant.passport_number} />
-                  <InfoRow label="Issuing Country" value={applicant.passport_issuing_country} />
                   <InfoRow
-                    label="Issue Date"
+                    label={t("passport.number") || "Passport Number"}
+                    value={applicant.passport_number}
+                  />
+                  <InfoRow
+                    label={t("passport.issuingCountry") || "Issuing Country"}
+                    value={applicant.passport_issuing_country}
+                  />
+                  <InfoRow
+                    label={t("passport.issueDate") || "Issue Date"}
                     value={
                       applicant.passport_issue_date
                         ? format(new Date(applicant.passport_issue_date), "MMM d, yyyy")
@@ -1070,7 +1143,7 @@ export default function ApplicantProfilePage() {
                     }
                   />
                   <InfoRow
-                    label="Expiry Date"
+                    label={t("passport.expiryDate") || "Expiry Date"}
                     value={
                       applicant.passport_expiry_date
                         ? format(new Date(applicant.passport_expiry_date), "MMM d, yyyy")
@@ -1082,14 +1155,28 @@ export default function ApplicantProfilePage() {
               {(applicant.sponsor_name || applicant.sponsor_relationship) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Sponsor Information</CardTitle>
+                    <CardTitle className="text-base">
+                      {t("sponsor.title") || "Sponsor Information"}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                    <InfoRow label="Sponsor Name" value={applicant.sponsor_name} />
-                    <InfoRow label="Relationship" value={applicant.sponsor_relationship} />
-                    <InfoRow label="Sponsor Phone" value={applicant.sponsor_phone} />
+                    <InfoRow
+                      label={t("sponsor.name") || "Sponsor Name"}
+                      value={applicant.sponsor_name}
+                    />
+                    <InfoRow
+                      label={t("sponsor.relationship") || "Relationship"}
+                      value={applicant.sponsor_relationship}
+                    />
+                    <InfoRow
+                      label={t("sponsor.phone") || "Sponsor Phone"}
+                      value={applicant.sponsor_phone}
+                    />
                     <div className="col-span-2 sm:col-span-3">
-                      <InfoRow label="Sponsor Address" value={applicant.sponsor_address} />
+                      <InfoRow
+                        label={t("sponsor.address") || "Sponsor Address"}
+                        value={applicant.sponsor_address}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -1097,11 +1184,19 @@ export default function ApplicantProfilePage() {
               {(applicant.insurance_company || applicant.insurance_number) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Insurance</CardTitle>
+                    <CardTitle className="text-base">
+                      {t("insurance.title") || "Insurance"}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4">
-                    <InfoRow label="Insurance Company" value={applicant.insurance_company} />
-                    <InfoRow label="Policy Number" value={applicant.insurance_number} />
+                    <InfoRow
+                      label={t("insurance.company") || "Insurance Company"}
+                      value={applicant.insurance_company}
+                    />
+                    <InfoRow
+                      label={t("insurance.policyNumber") || "Policy Number"}
+                      value={applicant.insurance_number}
+                    />
                   </CardContent>
                 </Card>
               )}
@@ -1111,14 +1206,25 @@ export default function ApplicantProfilePage() {
             <TabsContent value="travel" className="mt-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Travel Information</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("travel.title") || "Travel Information"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  <InfoRow label="Destination Country" value={applicant.destination_country} />
-                  <InfoRow label="Entry Country" value={applicant.entry_country} />
-                  <InfoRow label="Purpose of Travel" value={applicant.purpose_of_travel} />
                   <InfoRow
-                    label="Arrival Date"
+                    label={t("travel.destinationCountry") || "Destination Country"}
+                    value={applicant.destination_country}
+                  />
+                  <InfoRow
+                    label={t("travel.entryCountry") || "Entry Country"}
+                    value={applicant.entry_country}
+                  />
+                  <InfoRow
+                    label={t("travel.purpose") || "Purpose of Travel"}
+                    value={applicant.purpose_of_travel}
+                  />
+                  <InfoRow
+                    label={t("travel.arrivalDate") || "Arrival Date"}
                     value={
                       applicant.arrival_date
                         ? format(new Date(applicant.arrival_date), "MMM d, yyyy")
@@ -1126,21 +1232,34 @@ export default function ApplicantProfilePage() {
                     }
                   />
                   <InfoRow
-                    label="Departure Date"
+                    label={t("travel.departureDate") || "Departure Date"}
                     value={
                       applicant.departure_date
                         ? format(new Date(applicant.departure_date), "MMM d, yyyy")
                         : null
                     }
                   />
-                  <InfoRow label="Number of Entries" value={applicant.number_of_entries} />
                   <InfoRow
-                    label="Duration of Stay"
-                    value={applicant.duration_of_stay ? `${applicant.duration_of_stay} days` : null}
+                    label={t("travel.numEntries") || "Number of Entries"}
+                    value={applicant.number_of_entries}
                   />
-                  <InfoRow label="Hotel Name" value={applicant.hotel_name} />
+                  <InfoRow
+                    label={t("travel.duration") || "Duration of Stay"}
+                    value={
+                      applicant.duration_of_stay
+                        ? `${applicant.duration_of_stay} ${locale === "ar" ? "أيام" : "days"}`
+                        : null
+                    }
+                  />
+                  <InfoRow
+                    label={locale === "ar" ? "اسم الفندق" : "Hotel Name"}
+                    value={applicant.hotel_name}
+                  />
                   <div className="col-span-2 sm:col-span-3">
-                    <InfoRow label="Hotel Address" value={applicant.hotel_address} />
+                    <InfoRow
+                      label={locale === "ar" ? "عنوان الفندق" : "Hotel Address"}
+                      value={applicant.hotel_address}
+                    />
                   </div>
                 </CardContent>
               </Card>

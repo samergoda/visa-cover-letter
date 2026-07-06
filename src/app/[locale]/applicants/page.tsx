@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import {
   useReactTable,
   getCoreRowModel,
@@ -62,6 +62,7 @@ import type { Applicant, VisaStatus, PaginatedResult } from "@/types";
 
 export default function ApplicantsPage() {
   const router = useRouter();
+  const t = useTranslations("ApplicantsPage");
 
   const [data, setData] = useState<PaginatedResult<Applicant>>({
     data: [],
@@ -97,11 +98,11 @@ export default function ApplicantsPage() {
       const result = (await res.json()) as PaginatedResult<Applicant>;
       setData(result);
     } catch {
-      toast.error("Failed to load applicants");
+      toast.error(t("toasts.failedLoad"));
     } finally {
       setIsLoading(false);
     }
-  }, [search, statusFilter, page, sorting]);
+  }, [search, statusFilter, page, sorting, t]);
 
   useEffect(() => {
     fetch("/api/settings/statuses")
@@ -123,10 +124,10 @@ export default function ApplicantsPage() {
   const handleDelete = async (id: string) => {
     try {
       await fetch(`/api/applicants/${id}`, { method: "DELETE" });
-      toast.success("Applicant deleted");
+      toast.success(t("toasts.deleted"));
       void fetchApplicants();
     } catch {
-      toast.error("Failed to delete applicant");
+      toast.error(t("toasts.failedDelete"));
     }
   };
 
@@ -137,11 +138,11 @@ export default function ApplicantsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "bulk_delete", ids: selectedIds }),
       });
-      toast.success(`${selectedIds.length} applicant(s) deleted`);
+      toast.success(t("toasts.bulkDeleted", { count: selectedIds.length }));
       setRowSelection({});
       void fetchApplicants();
     } catch {
-      toast.error("Bulk delete failed");
+      toast.error(t("toasts.failedBulkDelete"));
     }
   };
 
@@ -157,12 +158,12 @@ export default function ApplicantsPage() {
           status_id: bulkStatusId,
         }),
       });
-      toast.success(`Status updated for ${selectedIds.length} applicant(s)`);
+      toast.success(t("toasts.bulkStatusUpdated", { count: selectedIds.length }));
       setRowSelection({});
       setBulkStatusId("");
       void fetchApplicants();
     } catch {
-      toast.error("Bulk status update failed");
+      toast.error(t("toasts.failedBulkStatus"));
     }
   };
 
@@ -186,9 +187,9 @@ export default function ApplicantsPage() {
       a.download = `applicants-${Date.now()}.xlsx`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("Export downloaded");
+      toast.success(t("toasts.exportDownloaded"));
     } catch {
-      toast.error("Export failed");
+      toast.error(t("toasts.exportFailed"));
     }
   };
 
@@ -215,27 +216,27 @@ export default function ApplicantsPage() {
     },
     {
       accessorKey: "full_name",
-      header: "Applicant Name",
+      header: t("columns.name"),
       cell: ({ row }) => <div className="font-medium">{row.original.full_name}</div>,
     },
     {
       accessorKey: "passport_number",
-      header: "Passport No.",
+      header: t("columns.passport"),
       cell: ({ row }) => (
         <span className="font-mono text-xs">{row.original.passport_number ?? "—"}</span>
       ),
     },
     {
       accessorKey: "nationality",
-      header: "Nationality",
+      header: t("columns.nationality"),
     },
     {
       accessorKey: "destination_country",
-      header: "Destination",
+      header: t("columns.destination"),
     },
     {
       accessorKey: "arrival_date",
-      header: "Travel Date",
+      header: t("columns.travelDate"),
       cell: ({ row }) =>
         row.original.arrival_date
           ? format(new Date(row.original.arrival_date), "MMM d, yyyy")
@@ -243,17 +244,17 @@ export default function ApplicantsPage() {
     },
     {
       id: "visa_status",
-      header: "Status",
+      header: t("columns.status"),
       cell: ({ row }) => <StatusBadge status={row.original.visa_status} />,
     },
     {
       accessorKey: "assigned_employee",
-      header: "Assigned To",
+      header: t("columns.assignedTo"),
       cell: ({ row }) => row.original.assigned_employee ?? "—",
     },
     {
       accessorKey: "progress_percentage",
-      header: "Progress",
+      header: t("columns.progress"),
       cell: ({ row }) => (
         <div className="flex items-center gap-2 min-w-[100px]">
           <Progress value={row.original.progress_percentage} className="h-1.5" />
@@ -265,12 +266,12 @@ export default function ApplicantsPage() {
     },
     {
       accessorKey: "created_at",
-      header: "Created",
+      header: t("columns.created"),
       cell: ({ row }) => format(new Date(row.original.created_at), "MMM d, yyyy"),
     },
     {
       accessorKey: "updated_at",
-      header: "Updated",
+      header: t("columns.updated"),
       cell: ({ row }) => format(new Date(row.original.updated_at), "MMM d, yyyy"),
     },
     {
@@ -280,13 +281,13 @@ export default function ApplicantsPage() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">Actions</span>
+              <span className="sr-only">{t("actions.label")}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
               <Link href={`/applicants/${row.original.id}`}>
-                <Eye className="mr-2 h-4 w-4" /> View Profile
+                <Eye className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" /> {t("actions.viewProfile")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -296,23 +297,23 @@ export default function ApplicantsPage() {
                   onSelect={(e) => e.preventDefault()}
                   className="text-destructive focus:text-destructive"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                  <Trash2 className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" /> {t("actions.delete")}
                 </DropdownMenuItem>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Applicant?</AlertDialogTitle>
+                  <AlertDialogTitle>{t("actions.deleteTitle")}</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will permanently delete {row.original.full_name} and all associated data.
+                    {t("actions.deleteDescription", { name: row.original.full_name })}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={() => handleDelete(row.original.id)}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete
+                    {t("delete")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -341,19 +342,19 @@ export default function ApplicantsPage() {
 
   return (
     <DashboardLayout
-      title="Applicants"
-      description={`${data?.meta?.total} total applicant${data?.meta?.total !== 1 ? "s" : ""}`}
+      title={t("title")}
+      description={t("description", { total: data?.meta?.total ?? 0 })}
     >
       <div className="space-y-4">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground rtl:left-auto rtl:right-3" />
             <Input
-              placeholder="Search by name, passport, nationality..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
+              className="pl-9 rtl:pl-3 rtl:pr-9"
             />
           </div>
 
@@ -365,10 +366,10 @@ export default function ApplicantsPage() {
             }}
           >
             <SelectTrigger className="w-48">
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder={t("filterPlaceholder")} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="all">{t("allStatuses")}</SelectItem>
               {Array.isArray(statuses) &&
                 statuses?.map((s) => (
                   <SelectItem key={s.id} value={s.id}>
@@ -386,16 +387,18 @@ export default function ApplicantsPage() {
             <DropdownMenuTrigger asChild>
               <Button variant="outline">
                 <Download className="h-4 w-4" />
-                Export
+                {t("export")}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => handleExport(false)}>Export All</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport(false)}>
+                {t("exportAll")}
+              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleExport(true)}
                 disabled={selectedIds.length === 0}
               >
-                Export Selected ({selectedIds.length})
+                {t("exportSelected", { count: selectedIds.length })}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -403,7 +406,7 @@ export default function ApplicantsPage() {
           <Button asChild>
             <Link href="/applicants/new">
               <Plus className="h-4 w-4" />
-              New Applicant
+              {t("newApplicant")}
             </Link>
           </Button>
         </div>
@@ -411,11 +414,11 @@ export default function ApplicantsPage() {
         {/* Bulk Actions */}
         {selectedIds.length > 0 && (
           <div className="flex flex-wrap items-center gap-3 rounded-lg border bg-muted/40 p-3">
-            <Badge variant="secondary">{selectedIds.length} selected</Badge>
+            <Badge variant="secondary">{t("selectedCount", { count: selectedIds.length })}</Badge>
 
             <Select value={bulkStatusId} onValueChange={setBulkStatusId}>
               <SelectTrigger className="w-44">
-                <SelectValue placeholder="Update status..." />
+                <SelectValue placeholder={t("updateStatusPlaceholder")} />
               </SelectTrigger>
               <SelectContent>
                 {statuses.map((s) => (
@@ -431,31 +434,30 @@ export default function ApplicantsPage() {
               onClick={handleBulkStatusUpdate}
               disabled={!bulkStatusId}
             >
-              Apply Status
+              {t("applyStatus")}
             </Button>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button size="sm" variant="destructive">
                   <Trash2 className="h-4 w-4" />
-                  Delete Selected
+                  {t("deleteSelected")}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete {selectedIds.length} applicant(s)?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete all selected applicants and their data. This cannot
-                    be undone.
-                  </AlertDialogDescription>
+                  <AlertDialogTitle>
+                    {t("bulkDeleteTitle", { count: selectedIds.length })}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>{t("bulkDeleteDescription")}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleBulkDelete}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    Delete All
+                    {t("deleteAll")}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -472,7 +474,7 @@ export default function ApplicantsPage() {
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-left font-medium text-muted-foreground"
+                      className="px-4 py-3 text-left rtl:text-right font-medium text-muted-foreground"
                       style={{ width: header.getSize() !== 150 ? header.getSize() : undefined }}
                     >
                       {header.isPlaceholder ? null : (
@@ -517,9 +519,9 @@ export default function ApplicantsPage() {
               ) : table.getRowModel().rows.length === 0 ? (
                 <tr>
                   <td colSpan={columns.length} className="py-16 text-center text-muted-foreground">
-                    No applicants found.{" "}
+                    {t("noApplicants")}
                     <Link href="/applicants/new" className="text-primary hover:underline">
-                      Add the first one.
+                      {t("addFirst")}
                     </Link>
                   </td>
                 </tr>
@@ -545,8 +547,11 @@ export default function ApplicantsPage() {
         {/* Pagination */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {(page - 1) * 20 + 1}–{Math.min(page * 20, data?.meta?.total)} of{" "}
-            {data?.meta?.total}
+            {t("showing", {
+              from: (page - 1) * 20 + 1,
+              to: Math.min(page * 20, data?.meta?.total ?? 0),
+              total: data?.meta?.total ?? 0,
+            })}
           </p>
           <div className="flex gap-2">
             <Button
@@ -555,7 +560,7 @@ export default function ApplicantsPage() {
               onClick={() => setPage((p) => p - 1)}
               disabled={page <= 1}
             >
-              Previous
+              {t("previous")}
             </Button>
             <Button
               variant="outline"
@@ -563,7 +568,7 @@ export default function ApplicantsPage() {
               onClick={() => setPage((p) => p + 1)}
               disabled={page >= data?.meta?.totalPages}
             >
-              Next
+              {t("next")}
             </Button>
           </div>
         </div>

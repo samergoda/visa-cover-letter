@@ -10,7 +10,9 @@ const optionalDate = z
 export const applicantFormSchema = z.object({
   // Personal Information
   full_name: z.string().min(2, "Full name is required"),
-  nationality: z.string().min(2, "Nationality is required"),
+  nationality: z.string().optional().or(z.literal("")),
+  has_bank_account: z.boolean().optional(),
+  city: z.string().optional(),
   gender: z.enum(["male", "female", "other"]).optional().or(z.literal("")),
   date_of_birth: optionalDate,
   place_of_birth: z.string().optional(),
@@ -42,7 +44,7 @@ export const applicantFormSchema = z.object({
   passport_expiry_date: optionalDate,
   passport_issuing_country: z.string().optional(),
   // Travel
-  destination_country: z.string().min(2, "Destination country is required"),
+  destination_country: z.string().optional().or(z.literal("")),
   entry_country: z.string().optional(),
   purpose_of_travel: z.string().optional(),
   arrival_date: optionalDate,
@@ -73,6 +75,8 @@ export function applicantToFormValues(
   return {
     full_name: (applicant.full_name as string) ?? "",
     nationality: (applicant.nationality as string) ?? "",
+    has_bank_account: (applicant.has_bank_account as boolean) ?? false,
+    city: (applicant.city as string) ?? "",
     gender: (applicant.gender as ApplicantFormValues["gender"]) ?? "",
     date_of_birth: (applicant.date_of_birth as string) ?? "",
     place_of_birth: (applicant.place_of_birth as string) ?? "",
@@ -116,6 +120,8 @@ export function applicantToFormValues(
 export const defaultApplicantFormValues: ApplicantFormValues = {
   full_name: "",
   nationality: "",
+  has_bank_account: false,
+  city: "",
   gender: "",
   date_of_birth: "",
   place_of_birth: "",

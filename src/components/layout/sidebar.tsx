@@ -1,54 +1,55 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { FileText, History, Settings, Plane, Users, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navSections = [
   {
-    label: "Visa Management",
+    labelKey: "visaManagement",
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-      { href: "/applicants", label: "Applicants", icon: Users },
+      { href: "/dashboard", labelKey: "dashboard", icon: LayoutDashboard },
+      { href: "/applicants", labelKey: "applicants", icon: Users },
     ],
   },
   {
-    label: "Cover Letters",
+    labelKey: "coverLetters",
     items: [
-      { href: "/generate", label: "Generate Letter", icon: FileText },
-      { href: "/history", label: "History", icon: History },
+      { href: "/generate", labelKey: "generateLetter", icon: FileText },
+      { href: "/history", labelKey: "history", icon: History },
     ],
   },
   {
-    label: "System",
+    labelKey: "system",
     items: [
-      { href: "/admin/settings", label: "General Settings", icon: Settings },
-      { href: "/settings", label: "AI Settings", icon: Settings },
+      { href: "/admin/settings", labelKey: "generalSettings", icon: Settings },
+      { href: "/settings", labelKey: "aiSettings", icon: Settings },
     ],
   },
-];
+] as const;
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations("Sidebar");
 
   return (
-    <aside className="flex w-full flex-col border-b bg-card lg:fixed lg:inset-y-0 lg:w-64 lg:border-b-0 lg:border-r overflow-y-auto">
+    <aside className="flex w-full flex-col border-b bg-card lg:fixed lg:inset-y-0 lg:w-64 lg:left-0 lg:border-b-0 lg:border-r overflow-y-auto rtl:lg:left-auto rtl:lg:right-0 rtl:lg:border-r-0 rtl:lg:border-l">
       <div className="flex items-center gap-3 border-b px-6 py-5">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <Plane className="h-5 w-5" />
         </div>
         <div>
-          <p className="text-sm font-semibold leading-none">Visa Pro</p>
-          <p className="mt-1 text-xs text-muted-foreground">Application Management</p>
+          <p className="text-sm font-semibold leading-none">{t("visaPro")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("appManagement")}</p>
         </div>
       </div>
 
       <nav className="flex flex-col gap-4 p-3">
         {navSections.map((section) => (
-          <div key={section.label}>
+          <div key={section.labelKey}>
             <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {section.label}
+              {t(section.labelKey)}
             </p>
             <div className="flex flex-col gap-0.5">
               {section.items.map((item) => {
@@ -71,7 +72,7 @@ export function Sidebar() {
                     )}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
-                    {item.label}
+                    {t(item.labelKey)}
                   </Link>
                 );
               })}
@@ -81,7 +82,7 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto hidden border-t p-4 text-xs text-muted-foreground lg:block">
-        Schengen Visa Application System
+        {t("footer")}
       </div>
     </aside>
   );
