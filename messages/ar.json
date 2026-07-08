@@ -513,5 +513,155 @@
       "itemUpdated": "تم تحديث العنصر",
       "itemDeleted": "تم حذف العنصر"
     }
+  },
+  "ApplicantProfile": {
+    "tabs": {
+      "personal": "المعلومات الشخصية",
+      "travel": "معلومات السفر",
+      "documents": "المستندات",
+      "checklist": "قائمة المهام",
+      "notes": "الملاحظات",
+      "activity": "النشاطات",
+      "coverLetter": "رسالة التغطية"
+    },
+    "header": {
+      "allApplicants": "جميع المتقدمين",
+      "edit": "تعديل",
+      "cancel": "إلغاء",
+      "delete": "حذف",
+      "editApplicant": "تعديل بيانات المتقدم",
+      "deleteTitle": "حذف {name}؟",
+      "deleteDescription": "سيؤدي هذا إلى حذف المتقدم وجميع المستندات والملاحظات وسجلات النشاط المرتبطة به نهائياً.",
+      "changeStatus": "تغيير الحالة..."
+    },
+    "progress": {
+      "checklistProgress": "تقدم قائمة المهام",
+      "assignedTo": "مسند إلى"
+    },
+    "documents": {
+      "documentType": "نوع المستند",
+      "selectType": "اختر النوع...",
+      "chooseFile": "اختر ملفاً",
+      "uploading": "جاري الرفع...",
+      "uploadFile": "رفع المستند",
+      "noDocuments": "لم يتم رفع أي مستندات بعد.",
+      "deleteTitle": "حذف المستند؟",
+      "deleteDescription": "سيتم حذف المستند \"{name}\" نهائياً.",
+      "cancel": "إلغاء",
+      "delete": "حذف",
+      "selectFirst": "يرجى تحديد نوع المستند أولاً",
+      "uploaded": "تم رفع الملف بنجاح",
+      "deleted": "تم حذف المستند",
+      "types": {
+        "passport_scan": "نسخة جواز السفر",
+        "bank_statement": "كشف الحساب البنكي",
+        "salary_certificate": "شهادة الراتب",
+        "hotel_booking": "حجز الفندق",
+        "flight_reservation": "حجز الطيران",
+        "insurance_certificate": "شهادة التأمين",
+        "national_id": "الهوية الوطنية",
+        "personal_photo": "الصورة الشخصية",
+        "visa_application_form": "نموذج طلب التأشيرة",
+        "invitation_letter": "خطاب الدعوة",
+        "additional": "مستند إضافي"
+      }
+    },
+    "checklist": {
+      "progress": "التقدم",
+      "completed": "تم إنجاز {completed} من {total}",
+      "noItems": "لم يتم إعداد عناصر قائمة المهام بعد.",
+      "internalNotes": "ملاحظات داخلية...",
+      "saveNote": "حفظ الملاحظة",
+      "noteSaved": "تم حفظ الملاحظة"
+    },
+    "notes": {
+      "addNote": "إضافة ملاحظة",
+      "yourName": "اسمك",
+      "namePlaceholder": "علي أحمد",
+      "notePlaceholder": "اكتب ملاحظة...",
+      "adding": "جاري الإضافة...",
+      "addButton": "إضافة الملاحظة",
+      "noNotes": "لا توجد ملاحظات بعد.",
+      "required": "الاسم والمحتوى مطلوبان",
+      "added": "تمت إضافة الملاحظة"
+    },
+    "activity": {
+      "searchPlaceholder": "البحث في النشاطات...",
+      "all": "الكل",
+      "profile": "الملف الشخصي",
+      "status": "الحالة",
+      "checklists": "قوائم المهام",
+      "documents": "المستندات",
+      "notes": "الملاحظات",
+      "noActivity": "لم يتم تسجيل أي نشاطات بعد.",
+      "noMatches": "لا توجد نشاطات تطابق خيارات التصفية.",
+      "field": "الحقل",
+      "from": "من",
+      "to": "إلى",
+      "empty": "فارغ",
+      "timeline": "سجل النشاطات",
+      "actions": {
+        "applicant_created": "تم إنشاء المتقدم",
+        "applicant_updated": "تم تحديث المتقدم",
+        "checklist_updated": "تم تحديث قائمة المهام",
+        "status_changed": "تم تغيير الحالة",
+        "file_uploaded": "تم رفع الملف",
+        "file_deleted": "تم حذف الملف",
+        "note_added": "تمت إضافة الملاحظة"
+      }
+    },
+    "coverLetter": {
+      "aiModel": "نموذج الذكاء الاصطناعي",
+      "letterTone": "نبرة الرسالة",
+      "toneStandard": "رسمي / قياسي",
+      "toneExecutive": "مهني / تنفيذي",
+      "toneStudent": "طالب / أكاديمي",
+      "toneUrgent": "سفر عاجل",
+      "toneFamily": "لم شمل عائلي / ودي",
+      "generating": "جاري الإنشاء...",
+      "generate": "إنشاء رسالة التغطية",
+      "regenerate": "إعادة إنشاء",
+      "generatedTitle": "الرسالة المُنشأة",
+      "words": "{count} كلمة",
+      "copy": "نسخ",
+      "docx": "Word (DOCX)",
+      "pdf": "PDF",
+      "editHint": "يمكنك تحرير الرسالة مباشرة قبل تصديرها.",
+      "emptyTitle": "انقر على \"إنشاء رسالة التغطية\" لإنشاء رسالة باستخدام بيانات هذا المتقدم.",
+      "emptyHint": "يتطلب مفتاح API لـ OpenRouter في .env.local",
+      "generated": "تم إنشاء رسالة التغطية بنجاح",
+      "failed": "فشل إنشاء الرسالة",
+      "failedGeneration": "فشل الإنشاء. يرجى التحقق من مفتاح API.",
+      "copied": "تم النسخ إلى الحافظة"
+    },
+    "gender": {
+      "male": "ذكر",
+      "female": "أنثى",
+      "other": "آخر"
+    },
+    "maritalStatus": {
+      "single": "عازب/ة",
+      "married": "متزوج/ة",
+      "divorced": "مطلق/ة",
+      "widowed": "أرمل/ة",
+      "separated": "منفصل/ة"
+    },
+    "values": {
+      "yes": "نعم",
+      "no": "لا",
+      "days": "أيام"
+    },
+    "hotel": {
+      "name": "اسم الفندق",
+      "address": "عنوان الفندق"
+    },
+    "toasts": {
+      "saveSuccess": "تم تحديث بيانات المتقدم بنجاح",
+      "saveFailed": "فشل حفظ التغييرات",
+      "deleteSuccess": "تم حذف المتقدم بنجاح",
+      "deleteFailed": "فشل حذف المتقدم",
+      "statusUpdated": "تم تحديث الحالة بنجاح",
+      "statusFailed": "فشل تحديث الحالة"
+    }
   }
 }

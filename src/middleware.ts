@@ -10,12 +10,15 @@ const PUBLIC_PATHS = ["/login", "/api/auth", "/applicants/new", "/api/applicants
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. If it's an API route or static asset, bypass next-intl middleware
+  // 1. If it's an API route, static asset, or PWA file, bypass next-intl middleware
   if (
     pathname.startsWith("/api") ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
-    pathname.startsWith("/public")
+    pathname.startsWith("/public") ||
+    pathname === "/sw.js" ||
+    pathname === "/manifest.webmanifest" ||
+    pathname.startsWith("/icons")
   ) {
     // Perform standard auth check for protected API routes
     if (pathname.startsWith("/api")) {
@@ -65,5 +68,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|sw.js|manifest.webmanifest|icons/).*)" ],
 };

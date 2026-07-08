@@ -513,5 +513,155 @@
       "itemUpdated": "Item updated",
       "itemDeleted": "Item deleted"
     }
+  },
+  "ApplicantProfile": {
+    "tabs": {
+      "personal": "Personal",
+      "travel": "Travel",
+      "documents": "Documents",
+      "checklist": "Checklist",
+      "notes": "Notes",
+      "activity": "Activity",
+      "coverLetter": "Cover Letter"
+    },
+    "header": {
+      "allApplicants": "All Applicants",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "editApplicant": "Edit Applicant",
+      "deleteTitle": "Delete {name}?",
+      "deleteDescription": "This permanently deletes the applicant and all associated documents, notes, and activity logs.",
+      "changeStatus": "Change status..."
+    },
+    "progress": {
+      "checklistProgress": "Checklist Progress",
+      "assignedTo": "Assigned to"
+    },
+    "documents": {
+      "documentType": "Document Type",
+      "selectType": "Select type...",
+      "chooseFile": "Choose file",
+      "uploading": "Uploading...",
+      "uploadFile": "Upload File",
+      "noDocuments": "No documents uploaded yet.",
+      "deleteTitle": "Delete document?",
+      "deleteDescription": "This will permanently delete \"{name}\".",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "selectFirst": "Select a document type first",
+      "uploaded": "File uploaded",
+      "deleted": "Document deleted",
+      "types": {
+        "passport_scan": "Passport Scan",
+        "bank_statement": "Bank Statement",
+        "salary_certificate": "Salary Certificate",
+        "hotel_booking": "Hotel Booking",
+        "flight_reservation": "Flight Reservation",
+        "insurance_certificate": "Insurance Certificate",
+        "national_id": "National ID",
+        "personal_photo": "Personal Photo",
+        "visa_application_form": "Visa Application Form",
+        "invitation_letter": "Invitation Letter",
+        "additional": "Additional Document"
+      }
+    },
+    "checklist": {
+      "progress": "Progress",
+      "completed": "{completed}/{total} completed",
+      "noItems": "No checklist items configured.",
+      "internalNotes": "Internal notes...",
+      "saveNote": "Save Note",
+      "noteSaved": "Note saved"
+    },
+    "notes": {
+      "addNote": "Add Note",
+      "yourName": "Your Name",
+      "namePlaceholder": "John Smith",
+      "notePlaceholder": "Write a note...",
+      "adding": "Adding...",
+      "addButton": "Add Note",
+      "noNotes": "No notes yet.",
+      "required": "Author and content are required",
+      "added": "Note added"
+    },
+    "activity": {
+      "searchPlaceholder": "Search activity...",
+      "all": "All",
+      "profile": "Profile",
+      "status": "Status",
+      "checklists": "Checklists",
+      "documents": "Documents",
+      "notes": "Notes",
+      "noActivity": "No activity logged yet.",
+      "noMatches": "No activity matches your filters.",
+      "field": "Field",
+      "from": "From",
+      "to": "To",
+      "empty": "empty",
+      "timeline": "Activity Timeline",
+      "actions": {
+        "applicant_created": "Applicant Created",
+        "applicant_updated": "Applicant Updated",
+        "checklist_updated": "Checklist Updated",
+        "status_changed": "Status Changed",
+        "file_uploaded": "File Uploaded",
+        "file_deleted": "File Deleted",
+        "note_added": "Note Added"
+      }
+    },
+    "coverLetter": {
+      "aiModel": "AI Model",
+      "letterTone": "Letter Tone",
+      "toneStandard": "Formal / Standard",
+      "toneExecutive": "Professional / Executive",
+      "toneStudent": "Student / Academic",
+      "toneUrgent": "Urgent Travel",
+      "toneFamily": "Family Reunion / Warm",
+      "generating": "Generating...",
+      "generate": "Generate Cover Letter",
+      "regenerate": "Regenerate",
+      "generatedTitle": "Generated Letter",
+      "words": "{count} words",
+      "copy": "Copy",
+      "docx": "DOCX",
+      "pdf": "PDF",
+      "editHint": "You can edit the letter directly before exporting.",
+      "emptyTitle": "Click \"Generate Cover Letter\" to create a letter using this applicant's data.",
+      "emptyHint": "Requires an OpenRouter API key in .env.local",
+      "generated": "Cover letter generated",
+      "failed": "Failed to generate letter",
+      "failedGeneration": "Generation failed. Check your OpenRouter API key.",
+      "copied": "Copied to clipboard"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
+    "maritalStatus": {
+      "single": "Single",
+      "married": "Married",
+      "divorced": "Divorced",
+      "widowed": "Widowed",
+      "separated": "Separated"
+    },
+    "values": {
+      "yes": "Yes",
+      "no": "No",
+      "days": "days"
+    },
+    "hotel": {
+      "name": "Hotel Name",
+      "address": "Hotel Address"
+    },
+    "toasts": {
+      "saveSuccess": "Applicant updated",
+      "saveFailed": "Failed to save changes",
+      "deleteSuccess": "Applicant deleted",
+      "deleteFailed": "Failed to delete applicant",
+      "statusUpdated": "Status updated",
+      "statusFailed": "Failed to update status"
+    }
   }
 }

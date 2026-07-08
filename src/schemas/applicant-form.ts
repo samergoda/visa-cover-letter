@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { Applicant } from "@/types";
 
 const optionalDate = z
   .string()
@@ -70,7 +71,7 @@ export const applicantFormSchema = z.object({
 export type ApplicantFormValues = z.infer<typeof applicantFormSchema>;
 
 export function applicantToFormValues(
-  applicant: Partial<Record<string, unknown>>
+  applicant: Applicant | Partial<Record<string, unknown>>
 ): ApplicantFormValues {
   return {
     full_name: (applicant.full_name as string) ?? "",

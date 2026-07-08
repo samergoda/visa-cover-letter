@@ -180,6 +180,13 @@ export interface Applicant {
   updated_at: string;
   // Joined
   visa_status?: VisaStatus | null;
+  is_family_visa?: boolean | null;
+  spouse_full_name: string | null;
+  spouse_date_of_birth: string | null;
+  spouse_nationality: string | null;
+  spouse_passport_number: string | null;
+  number_of_children: number | null;
+  children_info: string | null;
 }
 
 export interface ApplicantDocument {
@@ -243,13 +250,62 @@ export interface ApplicantNote {
   created_at: string;
 }
 
+// ─── Activity Metadata types ─────────────────────────────────────────────────
+
+export interface FieldChange {
+  old: string | number | boolean | null;
+  new: string | number | boolean | null;
+}
+
+export interface UpdateMetadata {
+  changes: Record<string, FieldChange>;
+}
+
+export interface NoteMetadata {
+  content: string;
+}
+
+export interface StatusChangeMetadata {
+  old_status: string | null;
+  new_status: string;
+}
+
+export interface FileActivityMetadata {
+  file_name: string;
+  document_type: string;
+}
+
+export type ActivityMetadata =
+  | UpdateMetadata
+  | NoteMetadata
+  | StatusChangeMetadata
+  | FileActivityMetadata
+  | Record<string, unknown>;
+
+/** Type guard: metadata has a `changes` record (applicant_updated) */
+export function isUpdateMetadata(metadata: ActivityMetadata | null): metadata is UpdateMetadata {
+  return (
+    metadata !== null &&
+    "changes" in metadata &&
+    typeof metadata.changes === "object" &&
+    metadata.changes !== null
+  );
+}
+
+/** Type guard: metadata has `content` string (note_added) */
+export function isNoteMetadata(metadata: ActivityMetadata | null): metadata is NoteMetadata {
+  return metadata !== null && "content" in metadata && typeof metadata.content === "string";
+}
+
+// ─── Activity Log ────────────────────────────────────────────────────────────
+
 export interface ActivityLog {
   id: string;
   applicant_id: string;
   action: ActivityAction;
   description: string;
   performed_by: string | null;
-  metadata: Record<string, unknown> | null;
+  metadata: ActivityMetadata | null;
   created_at: string;
 }
 
