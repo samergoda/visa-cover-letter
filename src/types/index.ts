@@ -145,6 +145,8 @@ export interface Applicant {
   phone: string | null;
   email: string | null;
   home_address: string | null;
+  has_bank_account?: boolean | null;
+  city?: string | null;
   // Passport Details
   passport_number: string | null;
   passport_issue_date: string | null;

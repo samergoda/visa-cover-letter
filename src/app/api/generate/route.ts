@@ -8,6 +8,7 @@ import { DEFAULT_MODEL } from "@/types";
 interface GenerateRequestBody {
   client: ClientInformation;
   model?: OpenRouterModel;
+  tone?: string;
 }
 
 const VALID_MODELS: OpenRouterModel[] = [
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
 
     const model = body.model && VALID_MODELS.includes(body.model) ? body.model : DEFAULT_MODEL;
 
-    const prompt = buildCoverLetterPrompt(body.client);
+    const prompt = buildCoverLetterPrompt(body.client, body.tone);
 
     const result = await createChatCompletion({
       apiKey,

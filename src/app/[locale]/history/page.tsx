@@ -1,73 +1,65 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { Eye, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { clearHistory, deleteFromHistory, getHistory } from "@/lib/storage";
-import type { GeneratedLetter } from "@/types";
+import { clearHistory, deleteFromHistory } from "@/lib/storage";
+import { useHistory } from "@/hooks/use-api";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function HistoryPage() {
-  const [history, setHistory] = useState<GeneratedLetter[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const t = useTranslations("HistoryPage");
+  const queryClient = useQueryClient();
+  const { data: history = [], isLoading } = useHistory();
 
-  useEffect(() => {
-    setHistory(getHistory());
-    setIsLoaded(true);
-  }, []);
-
-  const refreshHistory = () => {
-    setHistory(getHistory());
+  const invalidateHistory = () => {
+    void queryClient.invalidateQueries({ queryKey: ["history"] });
   };
 
   const handleDelete = (id: string) => {
     deleteFromHistory(id);
-    refreshHistory();
-    toast.success("Letter removed from history");
+    invalidateHistory();
+    toast.success(t("toasts.removed"));
   };
 
   const handleClearAll = () => {
     clearHistory();
-    refreshHistory();
-    toast.success("History cleared");
+    invalidateHistory();
+    toast.success(t("toasts.cleared"));
   };
 
   return (
-    <DashboardLayout
-      title="Letter History"
-      description="Previously generated cover letters stored locally in your browser."
-    >
+    <DashboardLayout title={t("title")} description={t("description")}>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <Badge variant="secondary">{history.length} saved letters</Badge>
+        <Badge variant="secondary">{t("savedLetters", { count: history.length })}</Badge>
         {history.length > 0 ? (
           <Button variant="outline" onClick={handleClearAll}>
-            Clear All
+            {t("clearAll")}
           </Button>
         ) : null}
       </div>
 
-      {!isLoaded ? (
+      {isLoading ? (
         <Card>
           <CardContent className="py-10 text-center text-muted-foreground">
-            Loading history...
+            {t("loading")}
           </CardContent>
         </Card>
       ) : history.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No letters yet</CardTitle>
-            <CardDescription>
-              Generated cover letters will appear here for quick reference.
-            </CardDescription>
+            <CardTitle>{t("noLettersTitle")}</CardTitle>
+            <CardDescription>{t("noLettersDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild>
-              <Link href="/generate">Generate your first letter</Link>
+              <Link href="/generate">{t("generateFirst")}</Link>
             </Button>
           </CardContent>
         </Card>
@@ -87,12 +79,12 @@ export default function HistoryPage() {
                   <Button asChild variant="outline" size="sm">
                     <Link href={`/generate?historyId=${item.id}`}>
                       <Eye className="h-4 w-4" />
-                      View
+                      {t("view")}
                     </Link>
                   </Button>
                   <Button variant="outline" size="sm" onClick={() => handleDelete(item.id)}>
                     <Trash2 className="h-4 w-4" />
-                    Delete
+                    {t("delete")}
                   </Button>
                 </div>
               </CardContent>

@@ -1,8 +1,10 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/routing";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import {
@@ -24,8 +26,8 @@ import {
   RefreshCw,
   Download,
   FileDown,
+  Search,
 } from "lucide-react";
-import Link from "next/link";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ApplicantForm } from "@/components/applicants/applicant-form";
 import { StatusBadge } from "@/components/applicants/status-badge";
@@ -59,6 +61,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { applicantToFormValues, type ApplicantFormValues } from "@/schemas/applicant-form";
 import { exportToDocx, exportToPdf, copyToClipboard } from "@/lib/export";
+import {
+  useApplicant,
+  useStatuses,
+  useApplicantDocuments,
+  useApplicantChecklists,
+  useApplicantNotes,
+  useApplicantActivity,
+} from "@/hooks/use-api";
 import type {
   Applicant,
   ApplicantChecklist,
@@ -86,21 +96,14 @@ function InfoRow({ label, value }: { label: string; value?: string | number | nu
 
 // ─── Documents Panel ─────────────────────────────────────────────────────────
 function DocumentsPanel({ applicantId }: { applicantId: string }) {
-  const [docs, setDocs] = useState<ApplicantDocument[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: docs = [], isLoading } = useApplicantDocuments(applicantId);
   const [uploading, setUploading] = useState(false);
   const [docType, setDocType] = useState<string>("");
 
-  const fetchDocs = useCallback(async () => {
-    const res = await fetch(`/api/applicants/${applicantId}/documents`);
-    const data = (await res.json()) as ApplicantDocument[];
-    setDocs(data);
-    setIsLoading(false);
-  }, [applicantId]);
-
-  useEffect(() => {
-    void fetchDocs();
-  }, [fetchDocs]);
+  const invalidateDocs = () => {
+    void queryClient.invalidateQueries({ queryKey: ["applicant-documents", applicantId] });
+  };
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -123,7 +126,7 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
         return;
       }
       toast.success("File uploaded");
-      void fetchDocs();
+      invalidateDocs();
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -137,7 +140,7 @@ function DocumentsPanel({ applicantId }: { applicantId: string }) {
       body: JSON.stringify({ documentId: doc.id, fileName: doc.file_name }),
     });
     toast.success("Document deleted");
-    void fetchDocs();
+    invalidateDocs();
   };
 
   return (
@@ -258,25 +261,15 @@ function ChecklistPanel({
   applicantId: string;
   onProgressChange: (p: number) => void;
 }) {
-  const [items, setItems] = useState<ApplicantChecklist[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: items = [], isLoading } = useApplicantChecklists(applicantId);
   const [editingNotes, setEditingNotes] = useState<Record<string, string>>({});
 
-  const fetchItems = useCallback(async () => {
-    const res = await fetch(`/api/applicants/${applicantId}/checklists`);
-    const data = (await res.json()) as ApplicantChecklist[];
-    setItems(data);
-    setIsLoading(false);
-  }, [applicantId]);
-
-  useEffect(() => {
-    void fetchItems();
-  }, [fetchItems]);
+  const invalidateChecklists = () => {
+    void queryClient.invalidateQueries({ queryKey: ["applicant-checklists", applicantId] });
+  };
 
   const handleToggle = async (item: ApplicantChecklist, checked: boolean) => {
-    setItems((prev) =>
-      prev.map((it) => (it.id === item.id ? { ...it, is_completed: checked } : it))
-    );
     const res = await fetch(`/api/applicants/${applicantId}/checklists`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -291,7 +284,7 @@ function ChecklistPanel({
         it.id === item.id ? checked : it.is_completed
       ).length;
       onProgressChange(Math.round((completed / items.length) * 100));
-      void fetchItems();
+      invalidateChecklists();
     }
   };
 
@@ -311,7 +304,7 @@ function ChecklistPanel({
       delete n[item.id];
       return n;
     });
-    void fetchItems();
+    invalidateChecklists();
   };
 
   const completed = items.filter((i) => i.is_completed).length;
@@ -405,22 +398,11 @@ function ChecklistPanel({
 
 // ─── Notes Panel ─────────────────────────────────────────────────────────────
 function NotesPanel({ applicantId }: { applicantId: string }) {
-  const [notes, setNotes] = useState<ApplicantNote[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: notes = [], isLoading } = useApplicantNotes(applicantId);
   const [author, setAuthor] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const fetchNotes = useCallback(async () => {
-    const res = await fetch(`/api/applicants/${applicantId}/notes`);
-    const data = (await res.json()) as ApplicantNote[];
-    setNotes(data);
-    setIsLoading(false);
-  }, [applicantId]);
-
-  useEffect(() => {
-    void fetchNotes();
-  }, [fetchNotes]);
 
   const handleAdd = async () => {
     if (!author.trim() || !content.trim()) {
@@ -437,7 +419,8 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
       if (res.ok) {
         toast.success("Note added");
         setContent("");
-        void fetchNotes();
+        void queryClient.invalidateQueries({ queryKey: ["applicant-notes", applicantId] });
+
       }
     } finally {
       setSubmitting(false);
@@ -504,18 +487,9 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
 
 // ─── Activity Panel ────────────────────────────────────────────────────────
 function ActivityPanel({ applicantId }: { applicantId: string }) {
-  const [logs, setLogs] = useState<ActivityLog[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    fetch(`/api/applicants/${applicantId}/activity`)
-      .then((r) => r.json())
-      .then((d: ActivityLog[]) => {
-        setLogs(d);
-        setIsLoading(false);
-      })
-      .catch(() => setIsLoading(false));
-  }, [applicantId]);
+  const { data: logs = [], isLoading } = useApplicantActivity(applicantId);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const actionColors: Record<string, string> = {
     applicant_created: "bg-green-500",
@@ -527,6 +501,25 @@ function ActivityPanel({ applicantId }: { applicantId: string }) {
     note_added: "bg-slate-500",
   };
 
+  const categories = [
+    { value: "all", label: "All" },
+    { value: "profile", label: "Profile" },
+    { value: "status", label: "Status" },
+    { value: "checklist", label: "Checklists" },
+    { value: "files", label: "Documents" },
+    { value: "notes", label: "Notes" },
+  ];
+
+  const matchCategory = (action: string, category: string): boolean => {
+    if (category === "all") return true;
+    if (category === "profile") return action === "applicant_created" || action === "applicant_updated";
+    if (category === "status") return action === "status_changed";
+    if (category === "checklist") return action === "checklist_updated";
+    if (category === "files") return action === "file_uploaded" || action === "file_deleted";
+    if (category === "notes") return action === "note_added";
+    return false;
+  };
+
   if (isLoading)
     return (
       <div className="space-y-2">
@@ -535,36 +528,151 @@ function ActivityPanel({ applicantId }: { applicantId: string }) {
         ))}
       </div>
     );
-  if (logs.length === 0)
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">No activity logged yet.</p>
-    );
+
+  const filteredLogs = logs.filter((log) => {
+    const matchesCat = matchCategory(log.action, selectedCategory);
+    if (!matchesCat) return false;
+
+    if (!searchQuery.trim()) return true;
+
+    const query = searchQuery.toLowerCase();
+    const desc = log.description?.toLowerCase() || "";
+    const author = log.performed_by?.toLowerCase() || "";
+    const actionLabel = (ACTIVITY_ACTION_LABELS[log.action as keyof typeof ACTIVITY_ACTION_LABELS] ?? log.action).toLowerCase();
+
+    // Check if metadata changes contain search terms
+    let metadataMatch = false;
+    if (log.metadata && typeof log.metadata === "object") {
+      const metadataStr = JSON.stringify(log.metadata).toLowerCase();
+      metadataMatch = metadataStr.includes(query);
+    }
+
+    return desc.includes(query) || author.includes(query) || actionLabel.includes(query) || metadataMatch;
+  });
 
   return (
-    <div className="relative space-y-0">
-      <div className="absolute left-[15px] top-2 bottom-2 w-px bg-border" />
-      {logs.map((log) => (
-        <div key={log.id} className="relative flex gap-4 pb-4">
-          <div
-            className={`relative z-10 mt-1 h-[10px] w-[10px] shrink-0 rounded-full ${actionColors[log.action] ?? "bg-muted-foreground"}`}
+    <div className="space-y-4">
+      {/* Search and Filters */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search activity..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 h-9 text-xs"
           />
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-sm font-medium">
-                {ACTIVITY_ACTION_LABELS[log.action as keyof typeof ACTIVITY_ACTION_LABELS] ??
-                  log.action}
-              </span>
-              {log.performed_by && (
-                <span className="text-xs text-muted-foreground">by {log.performed_by}</span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">{log.description}</p>
-            <p className="text-xs text-muted-foreground">
-              {format(new Date(log.created_at), "MMM d, yyyy HH:mm")}
-            </p>
-          </div>
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-9 w-9 text-muted-foreground hover:text-foreground"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
         </div>
-      ))}
+        <div className="flex flex-wrap gap-1">
+          {categories.map((cat) => (
+            <Button
+              key={cat.value}
+              variant={selectedCategory === cat.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(cat.value)}
+              className="h-8 text-[11px] px-2.5"
+            >
+              {cat.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {logs.length === 0 ? (
+        <p className="py-8 text-center text-sm text-muted-foreground">No activity logged yet.</p>
+      ) : filteredLogs.length === 0 ? (
+        <p className="py-8 text-center text-sm text-muted-foreground">No activity matches your filters.</p>
+      ) : (
+        <div className="relative pl-6 space-y-5 pt-2">
+          <div className="absolute left-[7px] top-4 bottom-4 w-0.5 bg-border" />
+          {filteredLogs.map((log) => {
+            const metadataObj = log.metadata as any;
+            const hasChanges = log.action === "applicant_updated" && metadataObj?.changes && Object.keys(metadataObj.changes).length > 0;
+            const hasNoteContent = log.action === "note_added" && metadataObj?.content;
+
+            return (
+              <div key={log.id} className="relative group">
+                {/* Timeline dot */}
+                <div
+                  className={`absolute -left-[23px] top-1 h-3 w-3 rounded-full border-2 border-background shrink-0 ${actionColors[log.action] ?? "bg-muted-foreground"}`}
+                />
+                <div className="flex flex-col gap-1">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                    <div className="flex flex-wrap items-baseline gap-1.5">
+                      <span className="text-xs font-semibold text-foreground">
+                        {ACTIVITY_ACTION_LABELS[log.action as keyof typeof ACTIVITY_ACTION_LABELS] ??
+                          log.action}
+                      </span>
+                      {log.performed_by && (
+                        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.2 rounded font-medium">
+                          {log.performed_by}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      {format(new Date(log.created_at), "MMM d, yyyy HH:mm")}
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground/95">{log.description}</p>
+
+                  {/* Note Content */}
+                  {hasNoteContent && (
+                    <div className="mt-1 pl-2.5 border-l-2 border-primary/30 text-xs italic text-muted-foreground bg-muted/20 py-1.5 pr-2 rounded-r-md whitespace-pre-wrap">
+                      "{String(metadataObj.content)}"
+                    </div>
+                  )}
+
+                  {/* Diff View */}
+                  {hasChanges && (
+                    <div className="mt-1.5 overflow-hidden rounded-md border border-border bg-muted/10 text-[11px]">
+                      <table className="w-full border-collapse text-left">
+                        <thead>
+                          <tr className="border-b bg-muted/40 text-[9px] uppercase font-semibold text-muted-foreground">
+                            <th className="px-2.5 py-1 w-1/3">Field</th>
+                            <th className="px-2.5 py-1 w-1/3">From</th>
+                            <th className="px-2.5 py-1 w-1/3">To</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(metadataObj.changes).map(([field, diff]: [string, any]) => (
+                            <tr key={field} className="border-b last:border-b-0 hover:bg-muted/15">
+                              <td className="px-2.5 py-1 font-medium text-foreground">{field}</td>
+                              <td className="px-2.5 py-1 text-muted-foreground truncate max-w-[120px]" title={String(diff.old)}>
+                                {diff.old === null || diff.old === "" || diff.old === "None" || diff.old === "undefined" ? (
+                                  <span className="italic text-muted-foreground/50">empty</span>
+                                ) : (
+                                  String(diff.old)
+                                )}
+                              </td>
+                              <td className="px-2.5 py-1 text-foreground font-medium truncate max-w-[120px]" title={String(diff.new)}>
+                                {diff.new === null || diff.new === "" || diff.new === "None" || diff.new === "undefined" ? (
+                                  <span className="italic text-muted-foreground/50">empty</span>
+                                ) : (
+                                  String(diff.new)
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -574,6 +682,7 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
   const [letter, setLetter] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [model, setModel] = useState<OpenRouterModel>(DEFAULT_MODEL);
+  const [tone, setTone] = useState("standard");
 
   // Map Applicant → ClientInformation shape expected by /api/generate
   const buildClientPayload = () => ({
@@ -633,7 +742,7 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ client: buildClientPayload(), model }),
+        body: JSON.stringify({ client: buildClientPayload(), model, tone }),
       });
       const data = (await res.json()) as { content?: string; error?: string };
       if (!res.ok || !data.content) {
@@ -667,6 +776,21 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
                   {m.label}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5 flex-1 min-w-[200px]">
+          <Label>Letter Tone</Label>
+          <Select value={tone} onValueChange={setTone}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="standard">Formal / Standard</SelectItem>
+              <SelectItem value="executive">Professional / Executive</SelectItem>
+              <SelectItem value="student">Student / Academic</SelectItem>
+              <SelectItem value="urgent">Urgent Travel</SelectItem>
+              <SelectItem value="family">Family Reunion / Warm</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -763,44 +887,40 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ApplicantProfilePage() {
-  const params = useParams<{ id: string }>();
+  const params = useParams<{ id: string; locale: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const id = params.id;
+  const locale = params.locale;
+  const t = useTranslations("ApplicantForm");
 
-  const [applicant, setApplicant] = useState<Applicant | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const genderMap: Record<string, string> = {
+    male: locale === "ar" ? "ذكر" : "Male",
+    female: locale === "ar" ? "أنثى" : "Female",
+    other: locale === "ar" ? "آخر" : "Other",
+  };
+
+  const maritalStatusMap: Record<string, string> = {
+    single: locale === "ar" ? "عازب/ة" : "Single",
+    married: locale === "ar" ? "متزوج/ة" : "Married",
+    divorced: locale === "ar" ? "مطلق/ة" : "Divorced",
+    widowed: locale === "ar" ? "أرمل/ة" : "Widowed",
+    separated: locale === "ar" ? "منفصل/ة" : "Separated",
+  };
+
+  const { data: applicant = null, isLoading } = useApplicant(id);
+  const { data: statusesData } = useStatuses();
+  const statuses = (statusesData ?? []).filter((s) => s.is_active);
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [statuses, setStatuses] = useState<{ id: string; name: string; color: string }[]>([]);
   const [isChangingStatus, setIsChangingStatus] = useState(false);
 
-  const fetchApplicant = useCallback(async () => {
-    const res = await fetch(`/api/applicants/${id}`);
-    if (!res.ok) {
-      toast.error("Applicant not found");
-      router.push("/applicants");
-      return;
-    }
-    const data = (await res.json()) as Applicant;
-    setApplicant(data);
-    setProgress(data.progress_percentage);
-    setIsLoading(false);
-  }, [id, router]);
-
-  useEffect(() => {
-    void fetchApplicant();
-  }, [fetchApplicant]);
-
-  // Fetch available statuses
-  useEffect(() => {
-    fetch("/api/settings/statuses")
-      .then((r) => r.json())
-      .then((d: { id: string; name: string; color: string; is_active: boolean }[]) =>
-        setStatuses(d.filter((s) => s.is_active))
-      )
-      .catch(() => {});
-  }, []);
+  // Sync progress from applicant data
+  const applicantProgress = applicant?.progress_percentage ?? 0;
+  if (progress !== applicantProgress && !isLoading && applicant) {
+    setProgress(applicantProgress);
+  }
 
   const handleSave = async (values: ApplicantFormValues) => {
     setIsSaving(true);
@@ -821,16 +941,24 @@ export default function ApplicantProfilePage() {
       }
       toast.success("Applicant updated");
       setIsEditing(false);
-      void fetchApplicant();
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["applicant", id] });
+      void queryClient.invalidateQueries({ queryKey: ["applicant-activity", id] });
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    await fetch(`/api/applicants/${id}`, { method: "DELETE" });
-    toast.success("Applicant deleted");
-    router.push("/applicants");
+    try {
+      await fetch(`/api/applicants/${id}`, { method: "DELETE" });
+      toast.success("Applicant deleted");
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["applicants"] });
+      router.push("/applicants");
+    } catch {
+      toast.error("Failed to delete applicant");
+    }
   };
 
   const handleStatusChange = async (newStatusId: string) => {
@@ -847,7 +975,9 @@ export default function ApplicantProfilePage() {
         return;
       }
       toast.success("Status updated");
-      void fetchApplicant();
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["applicant", id] });
+      void queryClient.invalidateQueries({ queryKey: ["applicant-activity", id] });
     } finally {
       setIsChangingStatus(false);
     }
@@ -997,31 +1127,31 @@ export default function ApplicantProfilePage() {
             <TabsList className="flex-wrap h-auto gap-1">
               <TabsTrigger value="info">
                 <User className="mr-1.5 h-4 w-4" />
-                Personal
+                {t("steps.personal") || "Personal"}
               </TabsTrigger>
               <TabsTrigger value="travel">
                 <Plane className="mr-1.5 h-4 w-4" />
-                Travel
+                {t("steps.travel") || "Travel"}
               </TabsTrigger>
               <TabsTrigger value="documents">
                 <FileText className="mr-1.5 h-4 w-4" />
-                Documents
+                {locale === "ar" ? "المستندات" : "Documents"}
               </TabsTrigger>
               <TabsTrigger value="checklist">
                 <CheckSquare className="mr-1.5 h-4 w-4" />
-                Checklist
+                {locale === "ar" ? "قائمة المهام" : "Checklist"}
               </TabsTrigger>
               <TabsTrigger value="notes">
                 <MessageSquarePlus className="mr-1.5 h-4 w-4" />
-                Notes
+                {locale === "ar" ? "ملاحظات" : "Notes"}
               </TabsTrigger>
               <TabsTrigger value="activity">
                 <Activity className="mr-1.5 h-4 w-4" />
-                Activity
+                {locale === "ar" ? "النشاطات" : "Activity"}
               </TabsTrigger>
               <TabsTrigger value="cover-letter">
                 <Wand2 className="mr-1.5 h-4 w-4" />
-                Cover Letter
+                {locale === "ar" ? "رسالة التغطية" : "Cover Letter"}
               </TabsTrigger>
             </TabsList>
 
@@ -1029,40 +1159,96 @@ export default function ApplicantProfilePage() {
             <TabsContent value="info" className="mt-4 space-y-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Personal Information</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("personal.title") || "Personal Information"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  <InfoRow label="Full Name" value={applicant.full_name} />
-                  <InfoRow label="Nationality" value={applicant.nationality} />
-                  <InfoRow label="Gender" value={applicant.gender} />
                   <InfoRow
-                    label="Date of Birth"
+                    label={t("personal.fullName") || "Full Name"}
+                    value={applicant.full_name}
+                  />
+                  <InfoRow
+                    label={t("personal.nationality") || "Nationality"}
+                    value={applicant.nationality}
+                  />
+                  <InfoRow
+                    label={t("personal.gender") || "Gender"}
+                    value={
+                      applicant.gender ? genderMap[applicant.gender] || applicant.gender : null
+                    }
+                  />
+                  <InfoRow
+                    label={t("personal.dateOfBirth") || "Date of Birth"}
                     value={
                       applicant.date_of_birth
                         ? format(new Date(applicant.date_of_birth), "MMM d, yyyy")
                         : null
                     }
                   />
-                  <InfoRow label="Place of Birth" value={applicant.place_of_birth} />
-                  <InfoRow label="Marital Status" value={applicant.marital_status} />
-                  <InfoRow label="Occupation" value={applicant.occupation} />
-                  <InfoRow label="Employer" value={applicant.employer} />
-                  <InfoRow label="Phone" value={applicant.phone} />
-                  <InfoRow label="Email" value={applicant.email} />
+                  <InfoRow
+                    label={t("personal.placeOfBirth") || "Place of Birth"}
+                    value={applicant.place_of_birth}
+                  />
+                  <InfoRow
+                    label={t("personal.maritalStatus") || "Marital Status"}
+                    value={
+                      applicant.marital_status
+                        ? maritalStatusMap[applicant.marital_status] || applicant.marital_status
+                        : null
+                    }
+                  />
+                  <InfoRow
+                    label={t("personal.occupation") || "Occupation"}
+                    value={applicant.occupation}
+                  />
+                  <InfoRow
+                    label={t("personal.employer") || "Employer"}
+                    value={applicant.employer}
+                  />
+                  <InfoRow label={t("personal.phone") || "Phone Number"} value={applicant.phone} />
+                  <InfoRow label={t("personal.email") || "Email"} value={applicant.email} />
+                  <InfoRow label={t("personal.city") || "City"} value={applicant.city} />
+                  <InfoRow
+                    label={t("personal.hasBankAccount") || "Active Bank Account"}
+                    value={
+                      applicant.has_bank_account !== undefined &&
+                      applicant.has_bank_account !== null
+                        ? applicant.has_bank_account
+                          ? locale === "ar"
+                            ? "نعم"
+                            : "Yes"
+                          : locale === "ar"
+                            ? "لا"
+                            : "No"
+                        : "—"
+                    }
+                  />
                   <div className="col-span-2 sm:col-span-3">
-                    <InfoRow label="Home Address" value={applicant.home_address} />
+                    <InfoRow
+                      label={t("personal.homeAddress") || "Home Address"}
+                      value={applicant.home_address}
+                    />
                   </div>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Passport Details</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("passport.title") || "Passport Details"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  <InfoRow label="Passport Number" value={applicant.passport_number} />
-                  <InfoRow label="Issuing Country" value={applicant.passport_issuing_country} />
                   <InfoRow
-                    label="Issue Date"
+                    label={t("passport.number") || "Passport Number"}
+                    value={applicant.passport_number}
+                  />
+                  <InfoRow
+                    label={t("passport.issuingCountry") || "Issuing Country"}
+                    value={applicant.passport_issuing_country}
+                  />
+                  <InfoRow
+                    label={t("passport.issueDate") || "Issue Date"}
                     value={
                       applicant.passport_issue_date
                         ? format(new Date(applicant.passport_issue_date), "MMM d, yyyy")
@@ -1070,7 +1256,7 @@ export default function ApplicantProfilePage() {
                     }
                   />
                   <InfoRow
-                    label="Expiry Date"
+                    label={t("passport.expiryDate") || "Expiry Date"}
                     value={
                       applicant.passport_expiry_date
                         ? format(new Date(applicant.passport_expiry_date), "MMM d, yyyy")
@@ -1082,14 +1268,28 @@ export default function ApplicantProfilePage() {
               {(applicant.sponsor_name || applicant.sponsor_relationship) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Sponsor Information</CardTitle>
+                    <CardTitle className="text-base">
+                      {t("sponsor.title") || "Sponsor Information"}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                    <InfoRow label="Sponsor Name" value={applicant.sponsor_name} />
-                    <InfoRow label="Relationship" value={applicant.sponsor_relationship} />
-                    <InfoRow label="Sponsor Phone" value={applicant.sponsor_phone} />
+                    <InfoRow
+                      label={t("sponsor.name") || "Sponsor Name"}
+                      value={applicant.sponsor_name}
+                    />
+                    <InfoRow
+                      label={t("sponsor.relationship") || "Relationship"}
+                      value={applicant.sponsor_relationship}
+                    />
+                    <InfoRow
+                      label={t("sponsor.phone") || "Sponsor Phone"}
+                      value={applicant.sponsor_phone}
+                    />
                     <div className="col-span-2 sm:col-span-3">
-                      <InfoRow label="Sponsor Address" value={applicant.sponsor_address} />
+                      <InfoRow
+                        label={t("sponsor.address") || "Sponsor Address"}
+                        value={applicant.sponsor_address}
+                      />
                     </div>
                   </CardContent>
                 </Card>
@@ -1097,11 +1297,19 @@ export default function ApplicantProfilePage() {
               {(applicant.insurance_company || applicant.insurance_number) && (
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">Insurance</CardTitle>
+                    <CardTitle className="text-base">
+                      {t("insurance.title") || "Insurance"}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="grid grid-cols-2 gap-4">
-                    <InfoRow label="Insurance Company" value={applicant.insurance_company} />
-                    <InfoRow label="Policy Number" value={applicant.insurance_number} />
+                    <InfoRow
+                      label={t("insurance.company") || "Insurance Company"}
+                      value={applicant.insurance_company}
+                    />
+                    <InfoRow
+                      label={t("insurance.policyNumber") || "Policy Number"}
+                      value={applicant.insurance_number}
+                    />
                   </CardContent>
                 </Card>
               )}
@@ -1111,14 +1319,25 @@ export default function ApplicantProfilePage() {
             <TabsContent value="travel" className="mt-4">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">Travel Information</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("travel.title") || "Travel Information"}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                  <InfoRow label="Destination Country" value={applicant.destination_country} />
-                  <InfoRow label="Entry Country" value={applicant.entry_country} />
-                  <InfoRow label="Purpose of Travel" value={applicant.purpose_of_travel} />
                   <InfoRow
-                    label="Arrival Date"
+                    label={t("travel.destinationCountry") || "Destination Country"}
+                    value={applicant.destination_country}
+                  />
+                  <InfoRow
+                    label={t("travel.entryCountry") || "Entry Country"}
+                    value={applicant.entry_country}
+                  />
+                  <InfoRow
+                    label={t("travel.purpose") || "Purpose of Travel"}
+                    value={applicant.purpose_of_travel}
+                  />
+                  <InfoRow
+                    label={t("travel.arrivalDate") || "Arrival Date"}
                     value={
                       applicant.arrival_date
                         ? format(new Date(applicant.arrival_date), "MMM d, yyyy")
@@ -1126,21 +1345,34 @@ export default function ApplicantProfilePage() {
                     }
                   />
                   <InfoRow
-                    label="Departure Date"
+                    label={t("travel.departureDate") || "Departure Date"}
                     value={
                       applicant.departure_date
                         ? format(new Date(applicant.departure_date), "MMM d, yyyy")
                         : null
                     }
                   />
-                  <InfoRow label="Number of Entries" value={applicant.number_of_entries} />
                   <InfoRow
-                    label="Duration of Stay"
-                    value={applicant.duration_of_stay ? `${applicant.duration_of_stay} days` : null}
+                    label={t("travel.numEntries") || "Number of Entries"}
+                    value={applicant.number_of_entries}
                   />
-                  <InfoRow label="Hotel Name" value={applicant.hotel_name} />
+                  <InfoRow
+                    label={t("travel.duration") || "Duration of Stay"}
+                    value={
+                      applicant.duration_of_stay
+                        ? `${applicant.duration_of_stay} ${locale === "ar" ? "أيام" : "days"}`
+                        : null
+                    }
+                  />
+                  <InfoRow
+                    label={locale === "ar" ? "اسم الفندق" : "Hotel Name"}
+                    value={applicant.hotel_name}
+                  />
                   <div className="col-span-2 sm:col-span-3">
-                    <InfoRow label="Hotel Address" value={applicant.hotel_address} />
+                    <InfoRow
+                      label={locale === "ar" ? "عنوان الفندق" : "Hotel Address"}
+                      value={applicant.hotel_address}
+                    />
                   </div>
                 </CardContent>
               </Card>

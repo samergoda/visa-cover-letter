@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import type { FieldErrors, UseFormRegister, Control } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import {
   applicantFormSchema,
   defaultApplicantFormValues,
@@ -22,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { VisaStatus } from "@/types";
+import { useStatuses } from "@/hooks/use-api";
 
 interface FieldProps {
   name: keyof ApplicantFormValues;
@@ -47,7 +49,7 @@ function Field({
     <div className="space-y-1.5">
       <Label htmlFor={String(name)}>
         {label}
-        {required && <span className="ml-0.5 text-destructive">*</span>}
+        {required && <span className="mx-0.5 text-destructive">*</span>}
       </Label>
       <Input id={String(name)} type={type} placeholder={placeholder} {...register(name)} />
       {error?.message && <p className="text-xs text-destructive">{String(error.message)}</p>}
@@ -97,16 +99,11 @@ export function ApplicantForm({
   submitLabel = "Save Applicant",
   type = "edit",
 }: ApplicantFormProps) {
-  const [statuses, setStatuses] = useState<VisaStatus[]>([]);
+  const t = useTranslations("ApplicantForm");
+  const { data: statusesData } = useStatuses();
+  const statuses = (statusesData ?? []).filter((s: VisaStatus) => s.is_active);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = type === "new" ? 4 : 5;
-
-  useEffect(() => {
-    fetch("/api/settings/statuses")
-      .then((r) => r.json())
-      .then((d: VisaStatus[]) => setStatuses(d.filter((s) => s.is_active)))
-      .catch(() => {});
-  }, []);
 
   const form = useForm<ApplicantFormValues>({
     resolver: zodResolver(applicantFormSchema) as never,
@@ -157,6 +154,14 @@ export function ApplicantForm({
     }
   };
 
+  // Determine button text
+  const getSubmitButtonText = () => {
+    if (isSubmitting) return t("buttons.saving");
+    if (type === "new") return t("buttons.submit");
+    if (submitLabel === "Save Applicant") return t("buttons.save");
+    return submitLabel;
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Progress Indicator */}
@@ -188,10 +193,10 @@ export function ApplicantForm({
               ))}
             </div>
             <div className="flex justify-between text-xs text-muted-foreground mt-2">
-              <span>Personal</span>
-              <span>Passport</span>
-              <span>Travel</span>
-              <span>Additional</span>
+              <span>{t("steps.personal")}</span>
+              <span>{t("steps.passport")}</span>
+              <span>{t("steps.travel")}</span>
+              <span>{t("steps.additional")}</span>
             </div>
           </CardContent>
         </Card>
@@ -201,40 +206,40 @@ export function ApplicantForm({
       {(type !== "new" || currentStep === 1) && (
         <Card>
           <CardHeader>
-            <CardTitle>Personal Information</CardTitle>
-            <CardDescription>Core identity details of the applicant.</CardDescription>
+            <CardTitle>{t("personal.title")}</CardTitle>
+            <CardDescription>{t("personal.description")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <Field
               name="full_name"
-              label="Full Name"
-              placeholder="John Doe"
+              label={t("personal.fullName")}
+              placeholder={t("personal.fullNamePlaceholder")}
               required
               register={register}
               errors={errors}
             />
             <Field
               name="nationality"
-              label="Nationality"
-              placeholder="Lebanese"
+              label={t("personal.nationality")}
+              placeholder={t("personal.nationalityPlaceholder")}
               required
               register={register}
               errors={errors}
             />
             <div className="space-y-1.5">
-              <Label>Gender</Label>
+              <Label>{t("personal.gender")}</Label>
               <Controller
                 control={control}
                 name="gender"
                 render={({ field }) => (
                   <Select value={field.value ?? ""} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select gender" />
+                      <SelectValue placeholder={t("personal.selectGender")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="male">{t("personal.genderMale")}</SelectItem>
+                      <SelectItem value="female">{t("personal.genderFemale")}</SelectItem>
+                      <SelectItem value="other">{t("personal.genderOther")}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -242,33 +247,33 @@ export function ApplicantForm({
             </div>
             <DateField
               name="date_of_birth"
-              label="Date of Birth"
+              label={t("personal.dateOfBirth")}
               control={control}
               errors={errors}
             />
             <Field
               name="place_of_birth"
-              label="Place of Birth"
-              placeholder="Beirut"
+              label={t("personal.placeOfBirth")}
+              placeholder={t("personal.placeOfBirthPlaceholder")}
               register={register}
               errors={errors}
             />
             <div className="space-y-1.5">
-              <Label>Marital Status</Label>
+              <Label>{t("personal.maritalStatus")}</Label>
               <Controller
                 control={control}
                 name="marital_status"
                 render={({ field }) => (
                   <Select value={field.value ?? ""} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder={t("personal.selectStatus")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="single">Single</SelectItem>
-                      <SelectItem value="married">Married</SelectItem>
-                      <SelectItem value="divorced">Divorced</SelectItem>
-                      <SelectItem value="widowed">Widowed</SelectItem>
-                      <SelectItem value="separated">Separated</SelectItem>
+                      <SelectItem value="single">{t("personal.statusSingle")}</SelectItem>
+                      <SelectItem value="married">{t("personal.statusMarried")}</SelectItem>
+                      <SelectItem value="divorced">{t("personal.statusDivorced")}</SelectItem>
+                      <SelectItem value="widowed">{t("personal.statusWidowed")}</SelectItem>
+                      <SelectItem value="separated">{t("personal.statusSeparated")}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
@@ -276,41 +281,66 @@ export function ApplicantForm({
             </div>
             <Field
               name="occupation"
-              label="Occupation"
-              placeholder="Engineer"
+              label={t("personal.occupation")}
+              placeholder={t("personal.occupationPlaceholder")}
               register={register}
               errors={errors}
             />
             <Field
               name="employer"
-              label="Employer"
-              placeholder="Company Name"
+              label={t("personal.employer")}
+              placeholder={t("personal.employerPlaceholder")}
               register={register}
               errors={errors}
             />
             <Field
               name="phone"
-              label="Phone Number"
-              placeholder="+961 70 000000"
+              label={t("personal.phone")}
+              placeholder={t("personal.phonePlaceholder")}
               register={register}
               errors={errors}
             />
             <Field
               name="email"
-              label="Email Address"
+              label={t("personal.email")}
               type="email"
-              placeholder="john@example.com"
+              placeholder={t("personal.emailPlaceholder")}
               register={register}
               errors={errors}
             />
             <div className="sm:col-span-2">
               <Field
                 name="home_address"
-                label="Home Address"
-                placeholder="Street, City, Country"
+                label={t("personal.homeAddress")}
+                placeholder={t("personal.homeAddressPlaceholder")}
                 register={register}
                 errors={errors}
               />
+            </div>
+            <Field
+              name="city"
+              label={t("personal.city") || "City"}
+              placeholder={t("personal.cityPlaceholder") || "e.g. Beirut"}
+              register={register}
+              errors={errors}
+            />
+            <div className="flex items-center space-x-2 pt-6">
+              <Controller
+                control={control}
+                name="has_bank_account"
+                render={({ field }) => (
+                  <input
+                    type="checkbox"
+                    id="has_bank_account"
+                    checked={field.value ?? false}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    className="h-4.5 w-4.5 rounded border-gray-300 accent-primary cursor-pointer"
+                  />
+                )}
+              />
+              <Label htmlFor="has_bank_account" className="font-medium cursor-pointer text-sm">
+                {t("personal.hasBankAccount") || "Has Active Bank Account"}
+              </Label>
             </div>
 
             {/* Family Visa Toggle */}
@@ -331,49 +361,49 @@ export function ApplicantForm({
                     )}
                   />
                   <Label htmlFor="is_family_visa" className="font-semibold">
-                    This is a family visa application (include spouse/children)
+                    {t("personal.isFamilyVisa")}
                   </Label>
                 </div>
 
                 {/* Spouse Information */}
                 {isFamilyVisa && (
-                  <div className="space-y-4 pl-6 border-l-2 border-primary/20">
-                    <h4 className="font-semibold text-sm">Spouse Information</h4>
+                  <div className="space-y-4 pl-6 border-l-2 border-primary/20 rtl:pl-0 rtl:pr-6 rtl:border-l-0 rtl:border-r-2">
+                    <h4 className="font-semibold text-sm">{t("personal.spouseTitle")}</h4>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <Field
                         name="spouse_full_name"
-                        label="Spouse Full Name"
-                        placeholder="Jane Doe"
+                        label={t("personal.spouseName")}
+                        placeholder={t("personal.spouseNamePlaceholder")}
                         register={register}
                         errors={errors}
                       />
                       <DateField
                         name="spouse_date_of_birth"
-                        label="Spouse Date of Birth"
+                        label={t("personal.spouseDob")}
                         control={control}
                         errors={errors}
                       />
                       <Field
                         name="spouse_nationality"
-                        label="Spouse Nationality"
-                        placeholder="Lebanese"
+                        label={t("personal.spouseNationality")}
+                        placeholder={t("personal.spouseNationalityPlaceholder")}
                         register={register}
                         errors={errors}
                       />
                       <Field
                         name="spouse_passport_number"
-                        label="Spouse Passport Number"
-                        placeholder="AB7654321"
+                        label={t("personal.spousePassport")}
+                        placeholder={t("personal.spousePassportPlaceholder")}
                         register={register}
                         errors={errors}
                       />
                     </div>
 
                     <div className="pt-2">
-                      <h4 className="font-semibold text-sm mb-3">Children Information</h4>
+                      <h4 className="font-semibold text-sm mb-3">{t("personal.childrenTitle")}</h4>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-1.5">
-                          <Label htmlFor="number_of_children">Number of Children</Label>
+                          <Label htmlFor="number_of_children">{t("personal.numChildren")}</Label>
                           <Input
                             id="number_of_children"
                             type="number"
@@ -383,16 +413,16 @@ export function ApplicantForm({
                           />
                         </div>
                         <div className="sm:col-span-2">
-                          <Label htmlFor="children_info">Children Details</Label>
+                          <Label htmlFor="children_info">{t("personal.childrenDetails")}</Label>
                           <textarea
                             id="children_info"
-                            placeholder="Name, Date of Birth, Passport Number for each child (one per line)"
+                            placeholder={t("personal.childrenDetailsPlaceholder")}
                             rows={3}
                             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                             {...register("children_info")}
                           />
                           <p className="text-xs text-muted-foreground mt-1">
-                            Example: John Doe, 2010-05-15, AB1122334
+                            {t("personal.childrenDetailsExample")}
                           </p>
                         </div>
                       </div>
@@ -409,32 +439,32 @@ export function ApplicantForm({
       {(type !== "new" || currentStep === 2) && (
         <Card>
           <CardHeader>
-            <CardTitle>Passport Details</CardTitle>
+            <CardTitle>{t("passport.title")}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <Field
               name="passport_number"
-              label="Passport Number"
-              placeholder="AB1234567"
+              label={t("passport.number")}
+              placeholder={t("passport.numberPlaceholder")}
               register={register}
               errors={errors}
             />
             <Field
               name="passport_issuing_country"
-              label="Issuing Country"
-              placeholder="Lebanon"
+              label={t("passport.issuingCountry")}
+              placeholder={t("passport.issuingCountryPlaceholder")}
               register={register}
               errors={errors}
             />
             <DateField
               name="passport_issue_date"
-              label="Issue Date"
+              label={t("passport.issueDate")}
               control={control}
               errors={errors}
             />
             <DateField
               name="passport_expiry_date"
-              label="Expiry Date"
+              label={t("passport.expiryDate")}
               control={control}
               errors={errors}
             />
@@ -446,70 +476,73 @@ export function ApplicantForm({
       {(type !== "new" || currentStep === 3) && (
         <Card>
           <CardHeader>
-            <CardTitle>Travel Information</CardTitle>
+            <CardTitle>{t("travel.title")}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2">
             <Field
               name="destination_country"
-              label="Destination Country"
-              placeholder="France"
+              label={t("travel.destinationCountry")}
+              placeholder={t("travel.destinationCountryPlaceholder")}
               required
               register={register}
               errors={errors}
             />
             <Field
               name="entry_country"
-              label="Entry Country"
-              placeholder="France"
+              label={t("travel.entryCountry")}
+              placeholder={t("travel.entryCountryPlaceholder")}
               register={register}
               errors={errors}
             />
             <Field
               name="purpose_of_travel"
-              label="Purpose of Travel"
-              placeholder="Tourism"
+              label={t("travel.purpose")}
+              placeholder={t("travel.purposePlaceholder")}
               register={register}
               errors={errors}
             />
             <div className="space-y-1.5">
-              <Label>Number of Entries</Label>
+              <Label>{t("travel.numEntries")}</Label>
               <Controller
                 control={control}
                 name="number_of_entries"
                 render={({ field }) => (
                   <Select value={field.value ?? ""} onValueChange={field.onChange}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select entries" />
+                      <SelectValue placeholder={t("travel.selectEntries")} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="single">Single</SelectItem>
-                      <SelectItem value="double">Double</SelectItem>
-                      <SelectItem value="multiple">Multiple</SelectItem>
+                      <SelectItem value="single">{t("travel.entrySingle")}</SelectItem>
+                      <SelectItem value="double">{t("travel.entryDouble")}</SelectItem>
+                      <SelectItem value="multiple">{t("travel.entryMultiple")}</SelectItem>
                     </SelectContent>
                   </Select>
                 )}
               />
             </div>
-            <DateField name="arrival_date" label="Arrival Date" control={control} errors={errors} />
+            <DateField
+              name="arrival_date"
+              label={t("travel.arrivalDate")}
+              control={control}
+              errors={errors}
+            />
             <DateField
               name="departure_date"
-              label="Departure Date"
+              label={t("travel.departureDate")}
               control={control}
               errors={errors}
             />
             <div className="space-y-1.5">
-              <Label htmlFor="duration_of_stay">Duration of Stay (days)</Label>
+              <Label htmlFor="duration_of_stay">{t("travel.duration")}</Label>
               <Input
                 id="duration_of_stay"
                 type="number"
-                placeholder="Auto-calculated"
+                placeholder={t("travel.durationPlaceholder")}
                 readOnly
                 className="bg-muted/50"
                 {...register("duration_of_stay")}
               />
-              <p className="text-xs text-muted-foreground">
-                Calculated from arrival &amp; departure dates
-              </p>
+              <p className="text-xs text-muted-foreground">{t("travel.durationDescription")}</p>
             </div>
           </CardContent>
         </Card>
@@ -521,28 +554,33 @@ export function ApplicantForm({
           {/* Financial / Sponsor */}
           <Card>
             <CardHeader>
-              <CardTitle>Sponsor Information</CardTitle>
-              <CardDescription>Optional — fill if trip is sponsored.</CardDescription>
+              <CardTitle>{t("sponsor.title")}</CardTitle>
+              <CardDescription>{t("sponsor.description")}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
-              <Field name="sponsor_name" label="Sponsor Name" register={register} errors={errors} />
+              <Field
+                name="sponsor_name"
+                label={t("sponsor.name")}
+                register={register}
+                errors={errors}
+              />
               <Field
                 name="sponsor_relationship"
-                label="Relationship"
-                placeholder="Father / Employer"
+                label={t("sponsor.relationship")}
+                placeholder={t("sponsor.relationshipPlaceholder")}
                 register={register}
                 errors={errors}
               />
               <Field
                 name="sponsor_phone"
-                label="Sponsor Phone"
+                label={t("sponsor.phone")}
                 register={register}
                 errors={errors}
               />
               <div className="sm:col-span-2">
                 <Field
                   name="sponsor_address"
-                  label="Sponsor Address"
+                  label={t("sponsor.address")}
                   register={register}
                   errors={errors}
                 />
@@ -553,20 +591,20 @@ export function ApplicantForm({
           {/* Insurance */}
           <Card>
             <CardHeader>
-              <CardTitle>Insurance</CardTitle>
+              <CardTitle>{t("insurance.title")}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2">
               {type !== "new" && (
                 <Field
                   name="insurance_company"
-                  label="Insurance Company"
+                  label={t("insurance.company")}
                   register={register}
                   errors={errors}
                 />
               )}{" "}
               <Field
                 name="insurance_number"
-                label="Policy Number"
+                label={t("insurance.policyNumber")}
                 register={register}
                 errors={errors}
               />
@@ -577,18 +615,18 @@ export function ApplicantForm({
           {type !== "new" && (
             <Card>
               <CardHeader>
-                <CardTitle>Assignment & Status</CardTitle>
+                <CardTitle>{t("assignment.title")}</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
-                  <Label>Visa Status</Label>
+                  <Label>{t("assignment.status")}</Label>
                   <Controller
                     control={control}
                     name="status_id"
                     render={({ field }) => (
                       <Select value={field.value ?? ""} onValueChange={field.onChange}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
+                          <SelectValue placeholder={t("assignment.selectStatus")} />
                         </SelectTrigger>
                         <SelectContent>
                           {statuses.map((s) => (
@@ -603,8 +641,8 @@ export function ApplicantForm({
                 </div>
                 <Field
                   name="assigned_employee"
-                  label="Assigned Employee"
-                  placeholder="Employee name"
+                  label={t("assignment.employee")}
+                  placeholder={t("assignment.employeePlaceholder")}
                   register={register}
                   errors={errors}
                 />
@@ -618,16 +656,26 @@ export function ApplicantForm({
       <div className="flex justify-between gap-3">
         {type === "new" && currentStep > 1 && (
           <Button type="button" variant="outline" onClick={prevStep} size="lg">
-            Previous
+            {t("buttons.previous")}
           </Button>
         )}
         {type === "new" && currentStep < totalSteps ? (
-          <Button type="button" onClick={nextStep} size="lg" className="ml-auto">
-            Next Step
+          <Button
+            type="button"
+            onClick={nextStep}
+            size="lg"
+            className="ml-auto rtl:ml-0 rtl:mr-auto"
+          >
+            {t("buttons.next")}
           </Button>
         ) : (
-          <Button type="submit" disabled={isSubmitting} size="lg" className="ml-auto">
-            {isSubmitting ? "Saving..." : submitLabel}
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            size="lg"
+            className="ml-auto rtl:ml-0 rtl:mr-auto"
+          >
+            {getSubmitButtonText()}
           </Button>
         )}
       </div>

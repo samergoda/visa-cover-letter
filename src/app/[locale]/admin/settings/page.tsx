@@ -1,8 +1,8 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { Plus, Pencil, Trash2, Check, X, ChevronUp, ChevronDown } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,11 +25,15 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import type { VisaStatus, ChecklistTemplate } from "@/types";
+import { useStatuses, useChecklistTemplates } from "@/hooks/use-api";
+import { useQueryClient } from "@tanstack/react-query";
 
 // ─── Visa Statuses Panel ──────────────────────────────────────────────────────
 function VisaStatusesPanel() {
-  const [statuses, setStatuses] = useState<VisaStatus[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const t = useTranslations("AdminSettings");
+  const queryClient = useQueryClient();
+  const { data: statusesData, isLoading } = useStatuses();
+  const statuses = Array.isArray(statusesData) ? statusesData : [];
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editColor, setEditColor] = useState("#6b7280");
@@ -38,20 +42,13 @@ function VisaStatusesPanel() {
   const [adding, setAdding] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
 
-  const fetch_ = useCallback(async () => {
-    const res = await fetch("/api/settings/statuses");
-    const data = (await res.json()) as VisaStatus[];
-    setStatuses(data);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void fetch_();
-  }, [fetch_]);
+  const invalidateStatuses = () => {
+    void queryClient.invalidateQueries({ queryKey: ["statuses"] });
+  };
 
   const handleAdd = async () => {
     if (!newName.trim()) {
-      toast.error("Name is required");
+      toast.error(t("toasts.nameRequired"));
       return;
     }
     setAdding(true);
@@ -70,11 +67,11 @@ function VisaStatusesPanel() {
         toast.error(e.error ?? "Failed");
         return;
       }
-      toast.success("Status created");
+      toast.success(t("toasts.statusCreated"));
       setNewName("");
       setNewColor("#6b7280");
       setShowAdd(false);
-      void fetch_();
+      invalidateStatuses();
     } finally {
       setAdding(false);
     }
@@ -82,7 +79,7 @@ function VisaStatusesPanel() {
 
   const handleEdit = async (id: string) => {
     if (!editName.trim()) {
-      toast.error("Name is required");
+      toast.error(t("toasts.nameRequired"));
       return;
     }
     await fetch(`/api/settings/statuses/${id}`, {
@@ -90,9 +87,9 @@ function VisaStatusesPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: editName.trim(), color: editColor }),
     });
-    toast.success("Status updated");
+    toast.success(t("toasts.statusUpdated"));
     setEditingId(null);
-    void fetch_();
+    invalidateStatuses();
   };
 
   const handleToggleActive = async (status: VisaStatus) => {
@@ -101,17 +98,17 @@ function VisaStatusesPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ is_active: !status.is_active }),
     });
-    void fetch_();
+    invalidateStatuses();
   };
 
   const handleDelete = async (id: string) => {
     const res = await fetch(`/api/settings/statuses/${id}`, { method: "DELETE" });
     if (!res.ok) {
-      toast.error("Cannot delete — status may be in use");
+      toast.error(t("toasts.cannotDelete"));
       return;
     }
-    toast.success("Status deleted");
-    void fetch_();
+    toast.success(t("toasts.statusDeleted"));
+    invalidateStatuses();
   };
 
   const handleMove = async (index: number, dir: -1 | 1) => {
@@ -119,12 +116,12 @@ function VisaStatusesPanel() {
     const target = index + dir;
     if (target < 0 || target >= newArr.length) return;
     [newArr[index], newArr[target]] = [newArr[target], newArr[index]];
-    setStatuses(newArr);
     await fetch("/api/settings/statuses", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "reorder", orderedIds: newArr.map((s) => s.id) }),
     });
+    invalidateStatuses();
   };
 
   if (isLoading)
@@ -140,25 +137,25 @@ function VisaStatusesPanel() {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button size="sm" onClick={() => setShowAdd((v) => !v)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Status
+          <Plus className="mr-2 h-4 w-4" /> {t("statuses.addStatus")}
         </Button>
       </div>
 
       {showAdd && (
         <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
-          <h3 className="text-sm font-semibold">New Status</h3>
+          <h3 className="text-sm font-semibold">{t("statuses.newStatus")}</h3>
           <div className="flex flex-wrap gap-3 items-end">
             <div className="space-y-1.5 flex-1 min-w-[160px]">
-              <Label htmlFor="new-status-name">Name</Label>
+              <Label htmlFor="new-status-name">{t("statuses.name")}</Label>
               <Input
                 id="new-status-name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="e.g. Under Review"
+                placeholder={t("statuses.namePlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="new-status-color">Color</Label>
+              <Label htmlFor="new-status-color">{t("statuses.color")}</Label>
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -172,11 +169,11 @@ function VisaStatusesPanel() {
             </div>
             <Button size="sm" onClick={handleAdd} disabled={adding}>
               {adding ? (
-                "Creating..."
+                t("statuses.creating")
               ) : (
                 <>
                   <Check className="mr-1.5 h-4 w-4" />
-                  Create
+                  {t("statuses.create")}
                 </>
               )}
             </Button>
@@ -273,18 +270,18 @@ function VisaStatusesPanel() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete &ldquo;{status.name}&rdquo;?</AlertDialogTitle>
+                        <AlertDialogTitle>{t("statuses.deleteTitle", { name: status.name })}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This cannot be undone. Applicants with this status will lose it.
+                          {t("statuses.deleteDescription")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t("statuses.cancel")}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(status.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Delete
+                          {t("statuses.delete")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -295,7 +292,7 @@ function VisaStatusesPanel() {
           </div>
         ))}
         {statuses.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">No statuses configured.</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">{t("statuses.noStatuses")}</p>
         )}
       </div>
     </div>
@@ -304,8 +301,10 @@ function VisaStatusesPanel() {
 
 // ─── Checklist Templates Panel ─────────────────────────────────────────────
 function ChecklistPanel() {
-  const [items, setItems] = useState<ChecklistTemplate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const t = useTranslations("AdminSettings");
+  const queryClient = useQueryClient();
+  const { data: itemsData, isLoading } = useChecklistTemplates();
+  const items: ChecklistTemplate[] = Array.isArray(itemsData) ? itemsData : [];
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editDesc, setEditDesc] = useState("");
@@ -314,20 +313,13 @@ function ChecklistPanel() {
   const [adding, setAdding] = useState(false);
   const [showAdd, setShowAdd] = useState(false);
 
-  const fetch_ = useCallback(async () => {
-    const res = await fetch("/api/settings/checklists");
-    const data = (await res.json()) as ChecklistTemplate[];
-    setItems(data);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    void fetch_();
-  }, [fetch_]);
+  const invalidateChecklists = () => {
+    void queryClient.invalidateQueries({ queryKey: ["checklist-templates"] });
+  };
 
   const handleAdd = async () => {
     if (!newName.trim()) {
-      toast.error("Name is required");
+      toast.error(t("toasts.nameRequired"));
       return;
     }
     setAdding(true);
@@ -346,11 +338,11 @@ function ChecklistPanel() {
         toast.error(e.error ?? "Failed");
         return;
       }
-      toast.success("Checklist item created");
+      toast.success(t("toasts.itemCreated"));
       setNewName("");
       setNewDesc("");
       setShowAdd(false);
-      void fetch_();
+      invalidateChecklists();
     } finally {
       setAdding(false);
     }
@@ -358,7 +350,7 @@ function ChecklistPanel() {
 
   const handleEdit = async (id: string) => {
     if (!editName.trim()) {
-      toast.error("Name is required");
+      toast.error(t("toasts.nameRequired"));
       return;
     }
     await fetch(`/api/settings/checklists/${id}`, {
@@ -366,9 +358,9 @@ function ChecklistPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: editName.trim(), description: editDesc.trim() || null }),
     });
-    toast.success("Item updated");
+    toast.success(t("toasts.itemUpdated"));
     setEditingId(null);
-    void fetch_();
+    invalidateChecklists();
   };
 
   const handleToggleActive = async (item: ChecklistTemplate) => {
@@ -377,13 +369,13 @@ function ChecklistPanel() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ is_active: !item.is_active }),
     });
-    void fetch_();
+    invalidateChecklists();
   };
 
   const handleDelete = async (id: string) => {
     await fetch(`/api/settings/checklists/${id}`, { method: "DELETE" });
-    toast.success("Item deleted");
-    void fetch_();
+    toast.success(t("toasts.itemDeleted"));
+    invalidateChecklists();
   };
 
   const handleMove = async (index: number, dir: -1 | 1) => {
@@ -391,12 +383,12 @@ function ChecklistPanel() {
     const target = index + dir;
     if (target < 0 || target >= newArr.length) return;
     [newArr[index], newArr[target]] = [newArr[target], newArr[index]];
-    setItems(newArr);
     await fetch("/api/settings/checklists", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "reorder", orderedIds: newArr.map((s) => s.id) }),
     });
+    invalidateChecklists();
   };
 
   if (isLoading)
@@ -412,43 +404,43 @@ function ChecklistPanel() {
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button size="sm" onClick={() => setShowAdd((v) => !v)}>
-          <Plus className="mr-2 h-4 w-4" /> Add Item
+          <Plus className="mr-2 h-4 w-4" /> {t("checklist.addItem")}
         </Button>
       </div>
 
       {showAdd && (
         <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
-          <h3 className="text-sm font-semibold">New Checklist Item</h3>
+          <h3 className="text-sm font-semibold">{t("checklist.newItem")}</h3>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="new-cl-name">
-                Name <span className="text-destructive">*</span>
+                {t("checklist.name")} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="new-cl-name"
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="e.g. Passport Received"
+                placeholder={t("checklist.namePlaceholder")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="new-cl-desc">Description (optional)</Label>
+              <Label htmlFor="new-cl-desc">{t("checklist.descriptionLabel")}</Label>
               <Input
                 id="new-cl-desc"
                 value={newDesc}
                 onChange={(e) => setNewDesc(e.target.value)}
-                placeholder="Short description"
+                placeholder={t("checklist.descriptionPlaceholder")}
               />
             </div>
           </div>
           <div className="flex gap-2">
             <Button size="sm" onClick={handleAdd} disabled={adding}>
               {adding ? (
-                "Creating..."
+                t("checklist.creating")
               ) : (
                 <>
                   <Check className="mr-1.5 h-4 w-4" />
-                  Create
+                  {t("checklist.create")}
                 </>
               )}
             </Button>
@@ -517,7 +509,7 @@ function ChecklistPanel() {
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <Badge variant={item.is_active ? "default" : "outline"} className="text-xs">
-                    {item.is_active ? "Active" : "Disabled"}
+                    {item.is_active ? t("checklist.active") : t("checklist.disabled")}
                   </Badge>
                   <Switch
                     checked={item.is_active}
@@ -548,19 +540,18 @@ function ChecklistPanel() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Delete &ldquo;{item.name}&rdquo;?</AlertDialogTitle>
+                        <AlertDialogTitle>{t("checklist.deleteTitle", { name: item.name })}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will remove the checklist item from all new applicants. Existing
-                          applicant checklists won&apos;t be affected.
+                          {t("checklist.deleteDescription")}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>{t("checklist.cancel")}</AlertDialogCancel>
                         <AlertDialogAction
                           onClick={() => handleDelete(item.id)}
                           className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                         >
-                          Delete
+                          {t("checklist.delete")}
                         </AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -572,7 +563,7 @@ function ChecklistPanel() {
         ))}
         {items.length === 0 && (
           <p className="py-8 text-center text-sm text-muted-foreground">
-            No checklist items configured.
+            {t("checklist.noItems")}
           </p>
         )}
       </div>
@@ -582,25 +573,26 @@ function ChecklistPanel() {
 
 // ─── Page ──────────────────────────────────────────────────────────────────────
 export default function AdminSettingsPage() {
+  const t = useTranslations("AdminSettings");
+
   return (
     <DashboardLayout
-      title="General Settings"
-      description="Configure visa statuses and checklist templates."
+      title={t("title")}
+      description={t("description")}
     >
       <div className="max-w-3xl space-y-6">
         <Tabs defaultValue="statuses">
           <TabsList>
-            <TabsTrigger value="statuses">Visa Statuses</TabsTrigger>
-            <TabsTrigger value="checklist">Checklist Items</TabsTrigger>
+            <TabsTrigger value="statuses">{t("tabs.statuses")}</TabsTrigger>
+            <TabsTrigger value="checklist">{t("tabs.checklist")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="statuses" className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Visa Statuses</CardTitle>
+                <CardTitle>{t("statuses.title")}</CardTitle>
                 <CardDescription>
-                  Create and manage the statuses applicants can be assigned. Disable a status to
-                  hide it from dropdowns without losing existing data.
+                  {t("statuses.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -612,10 +604,9 @@ export default function AdminSettingsPage() {
           <TabsContent value="checklist" className="mt-4">
             <Card>
               <CardHeader>
-                <CardTitle>Checklist Templates</CardTitle>
+                <CardTitle>{t("checklist.title")}</CardTitle>
                 <CardDescription>
-                  Items in this list are automatically added to every new applicant. Reorder them
-                  using the arrows. Disabling an item removes it from future applicants only.
+                  {t("checklist.description")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
