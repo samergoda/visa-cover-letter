@@ -6,6 +6,7 @@ import {
   bulkDeleteApplicants,
   bulkUpdateStatus,
 } from "@/lib/applicants";
+import { sendTelegramNotification } from "@/lib/telegram";
 
 export async function GET(request: NextRequest) {
   try {
@@ -64,6 +65,20 @@ export async function POST(request: NextRequest) {
     }
 
     const applicant = await createApplicant(applicantData, body.performed_by as string | undefined);
+
+    // Send Telegram Notification asynchronously
+    const telegramMessage = `<b>🆕 New Applicant Submitted!</b>\n\n` +
+      `👤 <b>Name:</b> ${applicant.full_name}\n` +
+      `🌍 <b>Destination:</b> ${applicant.destination_country}\n` +
+      `🏳️ <b>Nationality:</b> ${applicant.nationality || "N/A"}\n` +
+      `💼 <b>Occupation:</b> ${applicant.occupation || "N/A"}\n` +
+      `📞 <b>Phone:</b> ${applicant.phone || "N/A"}\n` +
+      `📧 <b>Email:</b> ${applicant.email || "N/A"}`;
+
+    sendTelegramNotification(telegramMessage).catch((err) =>
+      console.error("Failed to send Telegram notification:", err)
+    );
+
     return NextResponse.json(applicant, { status: 201 });
   } catch (error) {
     console.error("POST /api/applicants error:", error);

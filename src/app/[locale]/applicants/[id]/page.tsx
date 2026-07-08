@@ -26,6 +26,7 @@ import {
   RefreshCw,
   Download,
   FileDown,
+  Search,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ApplicantForm } from "@/components/applicants/applicant-form";
@@ -487,6 +488,8 @@ function NotesPanel({ applicantId }: { applicantId: string }) {
 // ─── Activity Panel ────────────────────────────────────────────────────────
 function ActivityPanel({ applicantId }: { applicantId: string }) {
   const { data: logs = [], isLoading } = useApplicantActivity(applicantId);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const actionColors: Record<string, string> = {
     applicant_created: "bg-green-500",
@@ -498,6 +501,25 @@ function ActivityPanel({ applicantId }: { applicantId: string }) {
     note_added: "bg-slate-500",
   };
 
+  const categories = [
+    { value: "all", label: "All" },
+    { value: "profile", label: "Profile" },
+    { value: "status", label: "Status" },
+    { value: "checklist", label: "Checklists" },
+    { value: "files", label: "Documents" },
+    { value: "notes", label: "Notes" },
+  ];
+
+  const matchCategory = (action: string, category: string): boolean => {
+    if (category === "all") return true;
+    if (category === "profile") return action === "applicant_created" || action === "applicant_updated";
+    if (category === "status") return action === "status_changed";
+    if (category === "checklist") return action === "checklist_updated";
+    if (category === "files") return action === "file_uploaded" || action === "file_deleted";
+    if (category === "notes") return action === "note_added";
+    return false;
+  };
+
   if (isLoading)
     return (
       <div className="space-y-2">
@@ -506,36 +528,151 @@ function ActivityPanel({ applicantId }: { applicantId: string }) {
         ))}
       </div>
     );
-  if (logs.length === 0)
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">No activity logged yet.</p>
-    );
+
+  const filteredLogs = logs.filter((log) => {
+    const matchesCat = matchCategory(log.action, selectedCategory);
+    if (!matchesCat) return false;
+
+    if (!searchQuery.trim()) return true;
+
+    const query = searchQuery.toLowerCase();
+    const desc = log.description?.toLowerCase() || "";
+    const author = log.performed_by?.toLowerCase() || "";
+    const actionLabel = (ACTIVITY_ACTION_LABELS[log.action as keyof typeof ACTIVITY_ACTION_LABELS] ?? log.action).toLowerCase();
+
+    // Check if metadata changes contain search terms
+    let metadataMatch = false;
+    if (log.metadata && typeof log.metadata === "object") {
+      const metadataStr = JSON.stringify(log.metadata).toLowerCase();
+      metadataMatch = metadataStr.includes(query);
+    }
+
+    return desc.includes(query) || author.includes(query) || actionLabel.includes(query) || metadataMatch;
+  });
 
   return (
-    <div className="relative space-y-0">
-      <div className="absolute left-[15px] top-2 bottom-2 w-px bg-border" />
-      {logs.map((log) => (
-        <div key={log.id} className="relative flex gap-4 pb-4">
-          <div
-            className={`relative z-10 mt-1 h-[10px] w-[10px] shrink-0 rounded-full ${actionColors[log.action] ?? "bg-muted-foreground"}`}
+    <div className="space-y-4">
+      {/* Search and Filters */}
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-xs">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search activity..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 h-9 text-xs"
           />
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-              <span className="text-sm font-medium">
-                {ACTIVITY_ACTION_LABELS[log.action as keyof typeof ACTIVITY_ACTION_LABELS] ??
-                  log.action}
-              </span>
-              {log.performed_by && (
-                <span className="text-xs text-muted-foreground">by {log.performed_by}</span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground">{log.description}</p>
-            <p className="text-xs text-muted-foreground">
-              {format(new Date(log.created_at), "MMM d, yyyy HH:mm")}
-            </p>
-          </div>
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-0 top-0 h-9 w-9 text-muted-foreground hover:text-foreground"
+              onClick={() => setSearchQuery("")}
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          )}
         </div>
-      ))}
+        <div className="flex flex-wrap gap-1">
+          {categories.map((cat) => (
+            <Button
+              key={cat.value}
+              variant={selectedCategory === cat.value ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategory(cat.value)}
+              className="h-8 text-[11px] px-2.5"
+            >
+              {cat.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {logs.length === 0 ? (
+        <p className="py-8 text-center text-sm text-muted-foreground">No activity logged yet.</p>
+      ) : filteredLogs.length === 0 ? (
+        <p className="py-8 text-center text-sm text-muted-foreground">No activity matches your filters.</p>
+      ) : (
+        <div className="relative pl-6 space-y-5 pt-2">
+          <div className="absolute left-[7px] top-4 bottom-4 w-0.5 bg-border" />
+          {filteredLogs.map((log) => {
+            const metadataObj = log.metadata as any;
+            const hasChanges = log.action === "applicant_updated" && metadataObj?.changes && Object.keys(metadataObj.changes).length > 0;
+            const hasNoteContent = log.action === "note_added" && metadataObj?.content;
+
+            return (
+              <div key={log.id} className="relative group">
+                {/* Timeline dot */}
+                <div
+                  className={`absolute -left-[23px] top-1 h-3 w-3 rounded-full border-2 border-background shrink-0 ${actionColors[log.action] ?? "bg-muted-foreground"}`}
+                />
+                <div className="flex flex-col gap-1">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                    <div className="flex flex-wrap items-baseline gap-1.5">
+                      <span className="text-xs font-semibold text-foreground">
+                        {ACTIVITY_ACTION_LABELS[log.action as keyof typeof ACTIVITY_ACTION_LABELS] ??
+                          log.action}
+                      </span>
+                      {log.performed_by && (
+                        <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.2 rounded font-medium">
+                          {log.performed_by}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">
+                      {format(new Date(log.created_at), "MMM d, yyyy HH:mm")}
+                    </span>
+                  </div>
+                  <p className="text-xs text-foreground/95">{log.description}</p>
+
+                  {/* Note Content */}
+                  {hasNoteContent && (
+                    <div className="mt-1 pl-2.5 border-l-2 border-primary/30 text-xs italic text-muted-foreground bg-muted/20 py-1.5 pr-2 rounded-r-md whitespace-pre-wrap">
+                      "{String(metadataObj.content)}"
+                    </div>
+                  )}
+
+                  {/* Diff View */}
+                  {hasChanges && (
+                    <div className="mt-1.5 overflow-hidden rounded-md border border-border bg-muted/10 text-[11px]">
+                      <table className="w-full border-collapse text-left">
+                        <thead>
+                          <tr className="border-b bg-muted/40 text-[9px] uppercase font-semibold text-muted-foreground">
+                            <th className="px-2.5 py-1 w-1/3">Field</th>
+                            <th className="px-2.5 py-1 w-1/3">From</th>
+                            <th className="px-2.5 py-1 w-1/3">To</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(metadataObj.changes).map(([field, diff]: [string, any]) => (
+                            <tr key={field} className="border-b last:border-b-0 hover:bg-muted/15">
+                              <td className="px-2.5 py-1 font-medium text-foreground">{field}</td>
+                              <td className="px-2.5 py-1 text-muted-foreground truncate max-w-[120px]" title={String(diff.old)}>
+                                {diff.old === null || diff.old === "" || diff.old === "None" || diff.old === "undefined" ? (
+                                  <span className="italic text-muted-foreground/50">empty</span>
+                                ) : (
+                                  String(diff.old)
+                                )}
+                              </td>
+                              <td className="px-2.5 py-1 text-foreground font-medium truncate max-w-[120px]" title={String(diff.new)}>
+                                {diff.new === null || diff.new === "" || diff.new === "None" || diff.new === "undefined" ? (
+                                  <span className="italic text-muted-foreground/50">empty</span>
+                                ) : (
+                                  String(diff.new)
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -545,6 +682,7 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
   const [letter, setLetter] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [model, setModel] = useState<OpenRouterModel>(DEFAULT_MODEL);
+  const [tone, setTone] = useState("standard");
 
   // Map Applicant → ClientInformation shape expected by /api/generate
   const buildClientPayload = () => ({
@@ -604,7 +742,7 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ client: buildClientPayload(), model }),
+        body: JSON.stringify({ client: buildClientPayload(), model, tone }),
       });
       const data = (await res.json()) as { content?: string; error?: string };
       if (!res.ok || !data.content) {
@@ -638,6 +776,21 @@ function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
                   {m.label}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5 flex-1 min-w-[200px]">
+          <Label>Letter Tone</Label>
+          <Select value={tone} onValueChange={setTone}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="standard">Formal / Standard</SelectItem>
+              <SelectItem value="executive">Professional / Executive</SelectItem>
+              <SelectItem value="student">Student / Academic</SelectItem>
+              <SelectItem value="urgent">Urgent Travel</SelectItem>
+              <SelectItem value="family">Family Reunion / Warm</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -788,16 +941,24 @@ export default function ApplicantProfilePage() {
       }
       toast.success("Applicant updated");
       setIsEditing(false);
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       void queryClient.invalidateQueries({ queryKey: ["applicant", id] });
+      void queryClient.invalidateQueries({ queryKey: ["applicant-activity", id] });
     } finally {
       setIsSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    await fetch(`/api/applicants/${id}`, { method: "DELETE" });
-    toast.success("Applicant deleted");
-    router.push("/applicants");
+    try {
+      await fetch(`/api/applicants/${id}`, { method: "DELETE" });
+      toast.success("Applicant deleted");
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      void queryClient.invalidateQueries({ queryKey: ["applicants"] });
+      router.push("/applicants");
+    } catch {
+      toast.error("Failed to delete applicant");
+    }
   };
 
   const handleStatusChange = async (newStatusId: string) => {
@@ -814,7 +975,9 @@ export default function ApplicantProfilePage() {
         return;
       }
       toast.success("Status updated");
+      void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       void queryClient.invalidateQueries({ queryKey: ["applicant", id] });
+      void queryClient.invalidateQueries({ queryKey: ["applicant-activity", id] });
     } finally {
       setIsChangingStatus(false);
     }

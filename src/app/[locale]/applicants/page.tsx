@@ -104,6 +104,7 @@ export default function ApplicantsPage() {
 
   const invalidateApplicants = () => {
     void queryClient.invalidateQueries({ queryKey: ["applicants"] });
+    void queryClient.invalidateQueries({ queryKey: ["dashboard"] });
   };
 
   const handleDelete = async (id: string) => {

@@ -124,6 +124,13 @@ export async function updateApplicant(
 ): Promise<Applicant> {
   const supabase = createAdminClient();
 
+  // Fetch old data to calculate diffs
+  const { data: oldData } = await supabase
+    .from("applicants")
+    .select("*")
+    .eq("id", id)
+    .single();
+
   const { data, error } = await supabase
     .from("applicants")
     .update(updates)
@@ -134,12 +141,49 @@ export async function updateApplicant(
   if (error) throw new Error(error.message);
   const applicant = data as Applicant;
 
+  // Compute field-level diffs
+  const changes: Record<string, { old: any; new: any }> = {};
+  if (oldData) {
+    // Fetch statuses to resolve status names if status changed
+    let statusMap = new Map<string, string>();
+    if (updates.status_id) {
+      const { data: statuses } = await supabase.from("visa_statuses").select("id, name");
+      statusMap = new Map((statuses || []).map((s: any) => [s.id, s.name]));
+    }
+
+    for (const key of Object.keys(updates) as Array<keyof Applicant>) {
+      if (key === "updated_at") continue;
+
+      const oldVal = (oldData as any)[key];
+      const newVal = (updates as any)[key];
+
+      const isDifferent =
+        oldVal !== newVal &&
+        !(oldVal === null && newVal === "") &&
+        !(oldVal === "" && newVal === null);
+
+      if (isDifferent) {
+        if (key === "status_id") {
+          const oldName = statusMap.get(oldVal) || "Unknown";
+          const newName = statusMap.get(newVal) || "Unknown";
+          changes["Status"] = { old: oldName, new: newName };
+        } else {
+          const niceKey = key
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+          changes[niceKey] = { old: oldVal ?? "None", new: newVal ?? "None" };
+        }
+      }
+    }
+  }
+
   await logActivity(
     id,
     "applicant_updated",
     `Applicant information was updated`,
     performedBy,
-    updates as Record<string, unknown>
+    { changes }
   );
 
   return applicant;
@@ -163,12 +207,37 @@ export async function bulkUpdateStatus(
   performedBy?: string
 ): Promise<void> {
   const supabase = createAdminClient();
+
+  // Fetch status names
+  const { data: statuses } = await supabase.from("visa_statuses").select("id, name");
+  const statusMap = new Map((statuses || []).map((s: any) => [s.id, s.name]));
+  const newStatusName = statusMap.get(statusId) || "Unknown";
+
+  // Fetch current applicants
+  const { data: applicants } = await supabase
+    .from("applicants")
+    .select("id, status_id")
+    .in("id", ids);
+
   const { error } = await supabase.from("applicants").update({ status_id: statusId }).in("id", ids);
   if (error) throw new Error(error.message);
 
   // Log for each
-  for (const id of ids) {
-    await logActivity(id, "status_changed", `Status was bulk updated`, performedBy);
+  if (applicants) {
+    for (const app of applicants) {
+      const oldStatusName = statusMap.get(app.status_id) || "Unknown";
+      await logActivity(
+        app.id,
+        "status_changed",
+        `Status was updated from "${oldStatusName}" to "${newStatusName}"`,
+        performedBy,
+        {
+          changes: {
+            "Status": { old: oldStatusName, new: newStatusName }
+          }
+        }
+      );
+    }
   }
 }
 
@@ -249,6 +318,15 @@ export async function updateChecklistItem(
 ): Promise<void> {
   const supabase = createAdminClient();
 
+  // Fetch current checklist item name
+  const { data: checklistItem } = await supabase
+    .from("applicant_checklists")
+    .select("*, template:checklist_templates(name)")
+    .eq("id", checklistId)
+    .single();
+
+  const itemName = (checklistItem as any)?.template?.name || "Checklist Item";
+
   const updateData: Record<string, unknown> = {
     is_completed: updates.is_completed,
     notes: updates.notes ?? null,
@@ -269,8 +347,12 @@ export async function updateChecklistItem(
   await logActivity(
     applicantId,
     "checklist_updated",
-    `Checklist item was marked as ${updates.is_completed ? "completed" : "incomplete"}`,
-    performedBy
+    `Checklist item "${itemName}" was marked as ${updates.is_completed ? "completed" : "incomplete"}`,
+    performedBy,
+    {
+      itemName,
+      isCompleted: updates.is_completed
+    }
   );
 }
 
@@ -324,7 +406,10 @@ export async function addNote(
     note.applicant_id,
     "note_added",
     `A note was added by ${note.author}`,
-    performedBy
+    performedBy,
+    {
+      content: note.content
+    }
   );
 
   return data as ApplicantNote;

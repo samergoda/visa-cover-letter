@@ -25,7 +25,32 @@ function appendSection(sections: string[], title: string, fields: (string | null
   }
 }
 
-export function buildCoverLetterPrompt(client: ClientInformation): string {
+export function buildCoverLetterPrompt(client: ClientInformation, tone?: string): string {
+  const toneRulesMap: Record<string, string[]> = {
+    standard: [
+      "- Tone: Formal & Standard.",
+      "- Use standard, professional, and respectful embassy-ready language suitable for any consulate or visa officer.",
+    ],
+    executive: [
+      "- Tone: Professional & Executive.",
+      "- Emphasize the applicant's senior professional responsibility, corporate background, and high economic/financial ties. Use sophisticated business vocabulary.",
+    ],
+    student: [
+      "- Tone: Student & Academic.",
+      "- Emphasize the applicant's educational program, enrollment status, parent/guardian sponsorship (if any), and academic goals. Keep the tone humble and career-oriented.",
+    ],
+    urgent: [
+      "- Tone: Urgent & Pressing.",
+      "- Politely highlight the tight schedule, time-sensitive nature of the trip (e.g. key meetings, fixed dates), and readiness to comply with rapid visa issuance. Underline clean travel record.",
+    ],
+    family: [
+      "- Tone: Warm & Family-focused.",
+      "- Emphasize family bonds, home ties, relationship to the host, and emotional importance of the visit, while maintaining professional embassy standards.",
+    ],
+  };
+
+  const selectedToneRules = toneRulesMap[tone || "standard"] || toneRulesMap.standard;
+
   const sections: string[] = [
     "You are a professional visa consultant. Write a formal embassy-ready cover letter in English.",
     "",
@@ -37,7 +62,8 @@ export function buildCoverLetterPrompt(client: ClientInformation): string {
     "- Separate paragraphs with a single blank line.",
     "- Keep the letter between 280 and 450 words.",
     "",
-    "STRICT CONTENT RULES:",
+    "STRICT CONTENT & TONE RULES:",
+    ...selectedToneRules,
     "- Use ONLY the client data provided below. Never invent, assume, or add information not explicitly given.",
     "- If a field is missing or empty, omit that topic entirely. Do not leave blank placeholders.",
     "- Use professional, natural, and respectful language suitable for embassy submission.",
