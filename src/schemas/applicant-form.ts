@@ -66,6 +66,11 @@ export const applicantFormSchema = z.object({
   // Assignment
   status_id: z.string().optional().or(z.literal("")),
   assigned_employee: z.string().optional(),
+  // Appointment Details
+  appointment_date: optionalDate,
+  appointment_time: z.string().optional().or(z.literal("")),
+  appointment_location: z.string().optional(),
+  appointment_notes: z.string().optional(),
 });
 
 export type ApplicantFormValues = z.infer<typeof applicantFormSchema>;
@@ -115,6 +120,10 @@ export function applicantToFormValues(
     insurance_number: (applicant.insurance_number as string) ?? "",
     status_id: (applicant.status_id as string) ?? "",
     assigned_employee: (applicant.assigned_employee as string) ?? "",
+    appointment_date: (applicant.appointment_date as string) ?? "",
+    appointment_time: (applicant.appointment_time as string) ?? "",
+    appointment_location: (applicant.appointment_location as string) ?? "",
+    appointment_notes: (applicant.appointment_notes as string) ?? "",
   };
 }
 
@@ -160,4 +169,8 @@ export const defaultApplicantFormValues: ApplicantFormValues = {
   insurance_number: "",
   status_id: "",
   assigned_employee: "",
+  appointment_date: "",
+  appointment_time: "",
+  appointment_location: "",
+  appointment_notes: "",
 };

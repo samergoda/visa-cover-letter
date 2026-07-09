@@ -14,6 +14,7 @@ import {
   MessageSquarePlus,
   Activity,
   Wand2,
+  Calendar,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { ApplicantForm } from "@/components/applicants/applicant-form";
@@ -34,6 +35,7 @@ import { ChecklistPanel } from "./_components/checklist-panel";
 import { NotesPanel } from "./_components/notes-panel";
 import { ActivityPanel } from "./_components/activity-panel";
 import { CoverLetterPanel } from "./_components/cover-letter-panel";
+import { ItineraryPanel } from "./_components/itinerary-panel";
 
 export default function ApplicantProfilePage() {
   const params = useParams();
@@ -215,6 +217,10 @@ export default function ApplicantProfilePage() {
                 <Wand2 className="mr-1.5 h-4 w-4" />
                 {t("tabs.coverLetter")}
               </TabsTrigger>
+              <TabsTrigger value="itinerary">
+                <Calendar className="mr-1.5 h-4 w-4" />
+                {t("tabs.itinerary")}
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="info" className="mt-4">
@@ -273,6 +279,14 @@ export default function ApplicantProfilePage() {
               <ErrorBoundary>
                 <Suspense fallback={<Skeleton className="h-48 w-full" />}>
                   <CoverLetterPanel applicant={applicant} />
+                </Suspense>
+              </ErrorBoundary>
+            </TabsContent>
+
+            <TabsContent value="itinerary" className="mt-4">
+              <ErrorBoundary>
+                <Suspense fallback={<Skeleton className="h-48 w-full" />}>
+                  <ItineraryPanel applicant={applicant} />
                 </Suspense>
               </ErrorBoundary>
             </TabsContent>

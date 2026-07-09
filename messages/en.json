@@ -189,6 +189,16 @@
       "employee": "Assigned Employee",
       "employeePlaceholder": "Employee name"
     },
+    "appointment": {
+      "title": "Embassy Appointment Details",
+      "description": "Information about the scheduled visa appointment.",
+      "date": "Appointment Date",
+      "time": "Appointment Time",
+      "location": "Appointment Location",
+      "locationPlaceholder": "e.g., German Consulate, Beirut",
+      "notes": "Appointment Notes",
+      "notesPlaceholder": "Any additional information regarding the appointment..."
+    },
     "buttons": {
       "previous": "Previous",
       "next": "Next Step",
@@ -517,6 +527,29 @@
     }
   },
   "ApplicantProfile": {
+    "appointment": {
+      "title": "Embassy Appointment",
+      "date": "Appointment Date",
+      "time": "Appointment Time",
+      "location": "Location",
+      "notes": "Notes",
+      "noAppointment": "No appointment scheduled yet."
+    },
+    "itinerary": {
+      "title": "AI Travel Itinerary",
+      "description": "Day-by-day plan of the applicant's stay in the destination country.",
+      "generate": "Generate Itinerary with AI",
+      "generating": "Generating Itinerary...",
+      "regenerate": "Regenerate Itinerary",
+      "save": "Save Itinerary",
+      "saving": "Saving Itinerary...",
+      "pdf": "Export PDF",
+      "docx": "Export DOCX",
+      "empty": "No itinerary has been generated for this applicant yet.",
+      "dayLabel": "Day {day}",
+      "notesPlaceholder": "Describe the activities for this day...",
+      "noTravelDates": "Please add arrival/departure dates to generate a realistic itinerary."
+    },
     "tabs": {
       "personal": "Personal",
       "travel": "Travel",
@@ -524,7 +557,8 @@
       "checklist": "Checklist",
       "notes": "Notes",
       "activity": "Activity",
-      "coverLetter": "Cover Letter"
+      "coverLetter": "Cover Letter",
+      "itinerary": "Itinerary"
     },
     "header": {
       "allApplicants": "All Applicants",

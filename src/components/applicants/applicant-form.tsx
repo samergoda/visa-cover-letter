@@ -611,6 +611,48 @@ export function ApplicantForm({
             </CardContent>
           </Card>
 
+          {/* Embassy Appointment Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("appointment.title")}</CardTitle>
+              <CardDescription>{t("appointment.description")}</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <DateField
+                name="appointment_date"
+                label={t("appointment.date")}
+                control={control}
+                errors={errors}
+              />
+              <Field
+                name="appointment_time"
+                label={t("appointment.time")}
+                type="time"
+                register={register}
+                errors={errors}
+              />
+              <div className="sm:col-span-2">
+                <Field
+                  name="appointment_location"
+                  label={t("appointment.location")}
+                  placeholder={t("appointment.locationPlaceholder")}
+                  register={register}
+                  errors={errors}
+                />
+              </div>
+              <div className="sm:col-span-2 space-y-1.5">
+                <Label htmlFor="appointment_notes">{t("appointment.notes")}</Label>
+                <textarea
+                  id="appointment_notes"
+                  placeholder={t("appointment.notesPlaceholder")}
+                  rows={3}
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  {...register("appointment_notes")}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Assignment */}
           {type !== "new" && (
             <Card>

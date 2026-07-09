@@ -131,6 +131,12 @@ export interface ChecklistTemplate {
   updated_at: string;
 }
 
+export interface ItineraryDay {
+  day: number;
+  date: string;
+  activities: string;
+}
+
 export interface Applicant {
   id: string;
   // Personal Information
@@ -175,6 +181,13 @@ export interface Applicant {
   status_id: string | null;
   assigned_employee: string | null;
   progress_percentage: number;
+  // Appointment Details
+  appointment_date: string | null;
+  appointment_time: string | null;
+  appointment_location: string | null;
+  appointment_notes: string | null;
+  // Itinerary
+  travel_itinerary: ItineraryDay[] | null;
   // Timestamps
   created_at: string;
   updated_at: string;
