@@ -32,6 +32,7 @@ const applicationSchema = z
     phone: z.string().min(5, "Please enter a valid phone number"),
     occupation: z.string().min(2, "Job title/Occupation is required"),
     city: z.string().min(2, "City is required"),
+    destination_country: z.string().min(2, "Destination country is required"),
     has_bank_account: z.boolean(),
     is_family_visa: z.boolean(),
     // Family specific fields (conditional validation)
@@ -77,6 +78,7 @@ export default function NewApplicantPage() {
       phone: "",
       occupation: "",
       city: "",
+      destination_country: "",
       has_bank_account: false,
       is_family_visa: false,
       spouse_full_name: "",
@@ -104,7 +106,7 @@ export default function NewApplicantPage() {
 
         // Default required fields to satisfy NOT NULL constraints gracefully
         nationality: "N/A",
-        destination_country: values.city || "N/A",
+        destination_country: values.destination_country,
       };
 
       const res = await fetch("/api/applicants", {
@@ -150,6 +152,8 @@ export default function NewApplicantPage() {
     jobPlaceholder: isAr ? "مثال: مهندس برمجيات، مدير مبيعات" : "e.g., Software Engineer, Manager",
     cityLabel: isAr ? "المدينة" : "City",
     cityPlaceholder: isAr ? "مثال: بيروت، دبي" : "e.g., Beirut, Dubai",
+    countryLabel: isAr ? "بلد السفر / الوجهة" : "Which country do you need to travel to?",
+    countryPlaceholder: isAr ? "مثال: فرنسا، ألمانيا" : "e.g., France, Germany",
     bankLabel: isAr ? "هل لديك حساب بنكي حالي نشط؟" : "Do you have an active bank account?",
     bankYes: isAr ? "نعم، لدي حساب بنكي نشط" : "Yes, I have an active bank account",
     bankNo: isAr ? "لا، ليس لدي حساب بنكي حالياً" : "No, I do not have a bank account currently",
@@ -354,29 +358,30 @@ export default function NewApplicantPage() {
                     </div>
                   </div>
 
-                  {/* Job & City */}
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="occupation"
-                        className="text-sm font-semibold flex items-center gap-1.5"
-                      >
-                        <Briefcase className="h-4 w-4 text-muted-foreground" />
-                        {strings.jobLabel} <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="occupation"
-                        placeholder={strings.jobPlaceholder}
-                        className={`rounded-xl h-11 border ${errors.occupation ? "border-destructive focus-visible:ring-destructive" : "focus-visible:ring-primary"}`}
-                        {...register("occupation")}
-                      />
-                      {errors.occupation?.message && (
-                        <p className="text-xs font-semibold text-destructive mt-1">
-                          {errors.occupation.message}
-                        </p>
-                      )}
-                    </div>
+                  {/* Job / Occupation */}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="occupation"
+                      className="text-sm font-semibold flex items-center gap-1.5"
+                    >
+                      <Briefcase className="h-4 w-4 text-muted-foreground" />
+                      {strings.jobLabel} <span className="text-destructive">*</span>
+                    </Label>
+                    <Input
+                      id="occupation"
+                      placeholder={strings.jobPlaceholder}
+                      className={`rounded-xl h-11 border ${errors.occupation ? "border-destructive focus-visible:ring-destructive" : "focus-visible:ring-primary"}`}
+                      {...register("occupation")}
+                    />
+                    {errors.occupation?.message && (
+                      <p className="text-xs font-semibold text-destructive mt-1">
+                        {errors.occupation.message}
+                      </p>
+                    )}
+                  </div>
 
+                  {/* City & Destination Country */}
+                  <div className="grid gap-6 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label
                         htmlFor="city"
@@ -394,6 +399,27 @@ export default function NewApplicantPage() {
                       {errors.city?.message && (
                         <p className="text-xs font-semibold text-destructive mt-1">
                           {errors.city.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="destination_country"
+                        className="text-sm font-semibold flex items-center gap-1.5"
+                      >
+                        <Plane className="h-4 w-4 text-muted-foreground" />
+                        {strings.countryLabel} <span className="text-destructive">*</span>
+                      </Label>
+                      <Input
+                        id="destination_country"
+                        placeholder={strings.countryPlaceholder}
+                        className={`rounded-xl h-11 border ${errors.destination_country ? "border-destructive focus-visible:ring-destructive" : "focus-visible:ring-primary"}`}
+                        {...register("destination_country")}
+                      />
+                      {errors.destination_country?.message && (
+                        <p className="text-xs font-semibold text-destructive mt-1">
+                          {errors.destination_country.message}
                         </p>
                       )}
                     </div>
