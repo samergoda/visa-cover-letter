@@ -32,10 +32,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <DashboardLayout
-      title={t("title")}
-      description={t("description")}
-    >
+    <DashboardLayout title={t("title")} description={t("description")}>
       <div className="mx-auto max-w-2xl space-y-6">
         <Card>
           <CardHeader>
@@ -43,17 +40,13 @@ export default function SettingsPage() {
               <Server className="h-5 w-5" />
               {t("apiConfigTitle")}
             </CardTitle>
-            <CardDescription>
-              {t("apiConfigDescription")}
-            </CardDescription>
+            <CardDescription>{t("apiConfigDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border p-4">
               <div>
                 <p className="text-sm font-medium">{t("apiKeyLabel")}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t("apiKeyHint")}
-                </p>
+                <p className="text-xs text-muted-foreground">{t("apiKeyHint")}</p>
               </div>
               {apiKeyConfigured === null ? (
                 <Badge variant="secondary">{t("checking")}</Badge>
@@ -82,9 +75,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>{t("aiModelTitle")}</CardTitle>
-            <CardDescription>
-              {t("aiModelDescription")}
-            </CardDescription>
+            <CardDescription>{t("aiModelDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <Label htmlFor="model">{t("modelLabel")}</Label>
@@ -106,9 +97,7 @@ export default function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>{t("environmentTitle")}</CardTitle>
-            <CardDescription>
-              {t("environmentDescription")}
-            </CardDescription>
+            <CardDescription>{t("environmentDescription")}</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">{t("defaultUrl")}</p>

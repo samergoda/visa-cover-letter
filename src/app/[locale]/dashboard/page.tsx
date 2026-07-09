@@ -54,24 +54,28 @@ export default function DashboardPage() {
 
   const statusColors: Record<string, string> = {
     "Waiting Documents": "bg-amber-500/10 text-amber-500 border-amber-500/20",
-    "Submitted": "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
-    "Approved": "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
+    Submitted: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20",
+    Approved: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
     "Passport Returned": "bg-lime-500/10 text-lime-500 border-lime-500/20",
-    "Rejected": "bg-red-500/10 text-red-500 border-red-500/20",
-    "Cancelled": "bg-slate-500/10 text-slate-500 border-slate-500/20",
+    Rejected: "bg-red-500/10 text-red-500 border-red-500/20",
+    Cancelled: "bg-slate-500/10 text-slate-500 border-slate-500/20",
   };
 
   return (
     <DashboardLayout title={t("title")} description={t("description")}>
       <div className="space-y-6">
-        
         {/* Top Header Row with quick action */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-foreground">{t("overviewTitle")}</h2>
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
+              {t("overviewTitle")}
+            </h2>
             <p className="text-xs text-muted-foreground">{t("overviewSubtitle")}</p>
           </div>
-          <Button asChild className="shrink-0 shadow-xs hover:shadow-md transition-all duration-300">
+          <Button
+            asChild
+            className="shrink-0 shadow-xs hover:shadow-md transition-all duration-300"
+          >
             <Link href="/applicants/new">
               <Plus className="h-4 w-4 mr-1.5" />
               {t("newApplicant")}
@@ -97,7 +101,9 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl pointer-events-none" />
               <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">{t("successRate")}</span>
+                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+                    {t("successRate")}
+                  </span>
                   <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-500 dark:text-indigo-400">
                     <Award className="h-4 w-4" />
                   </div>
@@ -118,7 +124,9 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 rounded-full blur-xl pointer-events-none" />
               <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{t("inProgress")}</span>
+                  <span className="text-xs font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+                    {t("inProgress")}
+                  </span>
                   <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500 dark:text-amber-400">
                     <FileCheck2 className="h-4 w-4" />
                   </div>
@@ -137,7 +145,9 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/5 rounded-full blur-xl pointer-events-none" />
               <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">{t("completed")}</span>
+                  <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                    {t("completed")}
+                  </span>
                   <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-500 dark:text-emerald-400">
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
@@ -156,7 +166,9 @@ export default function DashboardPage() {
               <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/5 rounded-full blur-xl pointer-events-none" />
               <CardContent className="p-5 flex flex-col justify-between h-full min-h-[100px]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">{t("issues")}</span>
+                  <span className="text-xs font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                    {t("issues")}
+                  </span>
                   <div className="p-1.5 rounded-lg bg-rose-500/10 text-rose-500 dark:text-rose-400">
                     <AlertCircle className="h-4 w-4" />
                   </div>
@@ -174,24 +186,32 @@ export default function DashboardPage() {
 
         {/* Main Columns Grid Layout */}
         <div className="grid gap-6 lg:grid-cols-3">
-          
           {/* Main Visual Analytics Column (Spans 2/3 on large screens) */}
           <div className="lg:col-span-2 space-y-6">
-            
             {/* Visual Charts Card */}
             <Card className="shadow-xs border-border/80">
               <CardHeader className="pb-0 flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-base font-semibold">{t("performanceAnalytics")}</CardTitle>
-                  <CardDescription className="text-xs">{t("performanceDescription")}</CardDescription>
+                  <CardTitle className="text-base font-semibold">
+                    {t("performanceAnalytics")}
+                  </CardTitle>
+                  <CardDescription className="text-xs">
+                    {t("performanceDescription")}
+                  </CardDescription>
                 </div>
               </CardHeader>
               <CardContent className="pt-4">
                 <Tabs defaultValue="timeline" className="space-y-4">
                   <TabsList className="grid grid-cols-3 w-full max-w-xs">
-                    <TabsTrigger value="timeline" className="text-xs">{t("tabTimeline")}</TabsTrigger>
-                    <TabsTrigger value="status" className="text-xs">{t("tabStatusShare")}</TabsTrigger>
-                    <TabsTrigger value="country" className="text-xs">{t("tabDestinations")}</TabsTrigger>
+                    <TabsTrigger value="timeline" className="text-xs">
+                      {t("tabTimeline")}
+                    </TabsTrigger>
+                    <TabsTrigger value="status" className="text-xs">
+                      {t("tabStatusShare")}
+                    </TabsTrigger>
+                    <TabsTrigger value="country" className="text-xs">
+                      {t("tabDestinations")}
+                    </TabsTrigger>
                   </TabsList>
 
                   {/* Tab 1: Monthly Timeline */}
@@ -211,18 +231,34 @@ export default function DashboardPage() {
                               <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.0} />
                             </linearGradient>
                           </defs>
-                          <XAxis dataKey="month" tick={{ fontSize: 10, fill: "#fff" }} axisLine={false} tickLine={false} />
-                          <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: "#fff" }} axisLine={false} tickLine={false} />
+                          <XAxis
+                            dataKey="month"
+                            tick={{ fontSize: 10, fill: "#fff" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            allowDecimals={false}
+                            tick={{ fontSize: 10, fill: "#fff" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
                           <Tooltip
                             contentStyle={{
-                              borderRadius: '8px',
-                              border: '1px solid var(--border)',
-                              backgroundColor: 'var(--card)',
-                              color: 'var(--foreground)',
-                              fontSize: '11px'
+                              borderRadius: "8px",
+                              border: "1px solid var(--border)",
+                              backgroundColor: "var(--card)",
+                              color: "var(--foreground)",
+                              fontSize: "11px",
                             }}
                           />
-                          <Area type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} fill="url(#areaGradient)" />
+                          <Area
+                            type="monotone"
+                            dataKey="count"
+                            stroke="#3b82f6"
+                            strokeWidth={2}
+                            fill="url(#areaGradient)"
+                          />
                         </AreaChart>
                       </ResponsiveContainer>
                     )}
@@ -259,17 +295,21 @@ export default function DashboardPage() {
                               </Pie>
                               <Tooltip
                                 contentStyle={{
-                                  borderRadius: '8px',
-                                  border: '1px solid var(--border)',
-                                  backgroundColor: 'var(--card)',
-                                  fontSize: '11px'
+                                  borderRadius: "8px",
+                                  border: "1px solid var(--border)",
+                                  backgroundColor: "var(--card)",
+                                  fontSize: "11px",
                                 }}
                               />
                             </PieChart>
                           </ResponsiveContainer>
                           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <span className="text-2xl font-extrabold text-foreground">{data.total}</span>
-                            <span className="text-[9px] text-muted-foreground uppercase font-semibold tracking-wider">{t("total")}</span>
+                            <span className="text-2xl font-extrabold text-foreground">
+                              {data.total}
+                            </span>
+                            <span className="text-[9px] text-muted-foreground uppercase font-semibold tracking-wider">
+                              {t("total")}
+                            </span>
                           </div>
                         </div>
 
@@ -277,8 +317,13 @@ export default function DashboardPage() {
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 flex-1 max-w-sm">
                           {data.byStatus.map((entry, index) => (
                             <div key={index} className="flex items-center gap-2 text-xs">
-                              <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: entry.color }} />
-                              <span className="text-muted-foreground truncate max-w-[100px]">{entry.status}</span>
+                              <span
+                                className="h-2 w-2 rounded-full shrink-0"
+                                style={{ backgroundColor: entry.color }}
+                              />
+                              <span className="text-muted-foreground truncate max-w-[100px]">
+                                {entry.status}
+                              </span>
                               <span className="font-semibold ml-auto">{entry.count}</span>
                             </div>
                           ))}
@@ -297,21 +342,43 @@ export default function DashboardPage() {
                       </div>
                     ) : (
                       <ResponsiveContainer width="100%" height={240}>
-                        <BarChart data={data.byCountry} layout="vertical" margin={{ left: -10, right: 10 }}>
+                        <BarChart
+                          data={data.byCountry}
+                          layout="vertical"
+                          margin={{ left: -10, right: 10 }}
+                        >
                           <defs>
                             <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
                               <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
                               <stop offset="100%" stopColor="#34d399" stopOpacity={0.3} />
                             </linearGradient>
                           </defs>
-                          <XAxis type="number" allowDecimals={false} tick={{ fontSize: 10, fill: "#fff" }} axisLine={false} tickLine={false} />
-                          <YAxis dataKey="country" type="category" width={80} tick={{ fontSize: 10, fill: "#fff" }} axisLine={false} tickLine={false} />
-                          <Bar 
-                            dataKey="count" 
-                            fill="url(#barGradient)" 
-                            radius={[0, 4, 4, 0]} 
-                            barSize={14} 
-                            label={{ position: 'right', fontSize: 10, fill: 'var(--foreground)', fontWeight: 600 }} 
+                          <XAxis
+                            type="number"
+                            allowDecimals={false}
+                            tick={{ fontSize: 10, fill: "#fff" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <YAxis
+                            dataKey="country"
+                            type="category"
+                            width={80}
+                            tick={{ fontSize: 10, fill: "#fff" }}
+                            axisLine={false}
+                            tickLine={false}
+                          />
+                          <Bar
+                            dataKey="count"
+                            fill="url(#barGradient)"
+                            radius={[0, 4, 4, 0]}
+                            barSize={14}
+                            label={{
+                              position: "right",
+                              fontSize: 10,
+                              fill: "var(--foreground)",
+                              fontWeight: 600,
+                            }}
                           />
                         </BarChart>
                       </ResponsiveContainer>
@@ -325,7 +392,9 @@ export default function DashboardPage() {
             <Card className="shadow-xs border-border/80">
               <CardHeader className="pb-3 flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-base font-semibold">{t("recentApplications")}</CardTitle>
+                  <CardTitle className="text-base font-semibold">
+                    {t("recentApplications")}
+                  </CardTitle>
                   <CardDescription className="text-xs">{t("recentDescription")}</CardDescription>
                 </div>
                 <Button variant="ghost" size="sm" asChild className="text-xs h-8 px-2">
@@ -358,7 +427,9 @@ export default function DashboardPage() {
 
                         {/* Name and destination */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-foreground truncate">{applicant.full_name}</p>
+                          <p className="text-xs font-semibold text-foreground truncate">
+                            {applicant.full_name}
+                          </p>
                           <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
                             <Globe className="h-3 w-3 text-muted-foreground/75" />
                             {applicant.destination_country}
@@ -385,12 +456,10 @@ export default function DashboardPage() {
                 )}
               </CardContent>
             </Card>
-
           </div>
 
           {/* Sidebar Columns (Spans 1/3 on large screens) */}
           <div className="space-y-6">
-            
             {/* Visual Funnel/Pipeline Breakdown */}
             <Card className="shadow-xs border-border/80">
               <CardHeader className="pb-2">
@@ -409,10 +478,18 @@ export default function DashboardPage() {
                 ) : (
                   <div className="space-y-3.5 pt-2">
                     {[
-                      { label: t("funnelDraft"), count: data.waiting_documents, color: "bg-amber-500" },
+                      {
+                        label: t("funnelDraft"),
+                        count: data.waiting_documents,
+                        color: "bg-amber-500",
+                      },
                       { label: t("funnelSubmitted"), count: data.submitted, color: "bg-cyan-500" },
                       { label: t("funnelApproved"), count: data.approved, color: "bg-emerald-500" },
-                      { label: t("funnelReturned"), count: data.passport_returned, color: "bg-lime-500" },
+                      {
+                        label: t("funnelReturned"),
+                        count: data.passport_returned,
+                        color: "bg-lime-500",
+                      },
                       { label: t("funnelRejected"), count: data.rejected, color: "bg-red-500" },
                       { label: t("funnelCancelled"), count: data.cancelled, color: "bg-slate-500" },
                     ].map((item, idx) => {
@@ -444,13 +521,23 @@ export default function DashboardPage() {
                 <CardDescription className="text-xs">{t("shortcutsSubtitle")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Button variant="outline" size="sm" asChild className="w-full justify-start text-xs border-border/60 hover:bg-muted/40 transition-colors">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="w-full justify-start text-xs border-border/60 hover:bg-muted/40 transition-colors"
+                >
                   <Link href="/applicants" className="flex items-center">
                     <Users className="h-4 w-4 mr-2 text-blue-500" />
                     {t("manageApplicants")}
                   </Link>
                 </Button>
-                <Button variant="outline" size="sm" asChild className="w-full justify-start text-xs border-border/60 hover:bg-muted/40 transition-colors">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  asChild
+                  className="w-full justify-start text-xs border-border/60 hover:bg-muted/40 transition-colors"
+                >
                   <Link href="/admin/settings" className="flex items-center">
                     <FileText className="h-4 w-4 mr-2 text-violet-500" />
                     {t("configureChecklists")}
@@ -458,11 +545,8 @@ export default function DashboardPage() {
                 </Button>
               </CardContent>
             </Card>
-
           </div>
-
         </div>
-
       </div>
     </DashboardLayout>
   );

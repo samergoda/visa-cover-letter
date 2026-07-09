@@ -37,7 +37,8 @@ export class ErrorBoundary extends Component<Props, State> {
           <AlertCircle className="h-8 w-8 text-destructive" />
           <h4 className="text-sm font-semibold text-foreground">Something went wrong</h4>
           <p className="text-xs text-muted-foreground max-w-xs">
-            {this.state.error?.message || "An unexpected error occurred while rendering this panel."}
+            {this.state.error?.message ||
+              "An unexpected error occurred while rendering this panel."}
           </p>
         </div>
       );

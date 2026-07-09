@@ -11,7 +11,9 @@
     "aiSettings": "إعدادات الذكاء الاصطناعي",
     "footer": "نظام طلبات تأشيرة شنغن",
     "visaPro": "فيزا برو",
-    "appManagement": "إدارة الطلبات"
+    "appManagement": "إدارة الطلبات",
+    "closeMenu": "إغلاق القائمة",
+    "openMenu": "فتح القائمة"
   },
   "Dashboard": {
     "title": "لوحة التحكم",

@@ -3,12 +3,7 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { RefreshCw, Wand2, Copy, FileDown, Download } from "lucide-react";
 import { exportToDocx, exportToPdf, copyToClipboard } from "@/lib/export";
-import {
-  type Applicant,
-  type OpenRouterModel,
-  OPENROUTER_MODELS,
-  DEFAULT_MODEL,
-} from "@/types";
+import { type Applicant, type OpenRouterModel, OPENROUTER_MODELS, DEFAULT_MODEL } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -217,12 +212,8 @@ export function CoverLetterPanel({ applicant }: { applicant: Applicant }) {
       {!letter && !isGenerating && (
         <div className="flex flex-col items-center gap-3 py-16 text-center text-muted-foreground">
           <Wand2 className="h-10 w-10 opacity-20" />
-          <p className="text-sm">
-            {t("emptyTitle")}
-          </p>
-          <p className="text-xs">
-            {t("emptyHint")}
-          </p>
+          <p className="text-sm">{t("emptyTitle")}</p>
+          <p className="text-xs">{t("emptyHint")}</p>
         </div>
       )}
     </div>

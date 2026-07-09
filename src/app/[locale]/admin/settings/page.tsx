@@ -270,7 +270,9 @@ function VisaStatusesPanel() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>{t("statuses.deleteTitle", { name: status.name })}</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {t("statuses.deleteTitle", { name: status.name })}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
                           {t("statuses.deleteDescription")}
                         </AlertDialogDescription>
@@ -292,7 +294,9 @@ function VisaStatusesPanel() {
           </div>
         ))}
         {statuses.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">{t("statuses.noStatuses")}</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            {t("statuses.noStatuses")}
+          </p>
         )}
       </div>
     </div>
@@ -540,7 +544,9 @@ function ChecklistPanel() {
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>{t("checklist.deleteTitle", { name: item.name })}</AlertDialogTitle>
+                        <AlertDialogTitle>
+                          {t("checklist.deleteTitle", { name: item.name })}
+                        </AlertDialogTitle>
                         <AlertDialogDescription>
                           {t("checklist.deleteDescription")}
                         </AlertDialogDescription>
@@ -562,9 +568,7 @@ function ChecklistPanel() {
           </div>
         ))}
         {items.length === 0 && (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            {t("checklist.noItems")}
-          </p>
+          <p className="py-8 text-center text-sm text-muted-foreground">{t("checklist.noItems")}</p>
         )}
       </div>
     </div>
@@ -576,10 +580,7 @@ export default function AdminSettingsPage() {
   const t = useTranslations("AdminSettings");
 
   return (
-    <DashboardLayout
-      title={t("title")}
-      description={t("description")}
-    >
+    <DashboardLayout title={t("title")} description={t("description")}>
       <div className="max-w-3xl space-y-6">
         <Tabs defaultValue="statuses">
           <TabsList>
@@ -591,9 +592,7 @@ export default function AdminSettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>{t("statuses.title")}</CardTitle>
-                <CardDescription>
-                  {t("statuses.description")}
-                </CardDescription>
+                <CardDescription>{t("statuses.description")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <VisaStatusesPanel />
@@ -605,9 +604,7 @@ export default function AdminSettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>{t("checklist.title")}</CardTitle>
-                <CardDescription>
-                  {t("checklist.description")}
-                </CardDescription>
+                <CardDescription>{t("checklist.description")}</CardDescription>
               </CardHeader>
               <CardContent>
                 <ChecklistPanel />

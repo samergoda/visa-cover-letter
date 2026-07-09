@@ -67,7 +67,8 @@ export async function POST(request: NextRequest) {
     const applicant = await createApplicant(applicantData, body.performed_by as string | undefined);
 
     // Send Telegram Notification asynchronously
-    const telegramMessage = `<b>🆕 New Applicant Submitted!</b>\n\n` +
+    const telegramMessage =
+      `<b>🆕 New Applicant Submitted!</b>\n\n` +
       `👤 <b>Name:</b> ${applicant.full_name}\n` +
       `🌍 <b>Destination:</b> ${applicant.destination_country}\n` +
       `🏳️ <b>Nationality:</b> ${applicant.nationality || "N/A"}\n` +

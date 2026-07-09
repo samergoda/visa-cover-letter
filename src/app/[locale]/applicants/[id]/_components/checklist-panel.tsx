@@ -13,11 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function ChecklistPanel({
-  applicantId,
-}: {
-  applicantId: string;
-}) {
+export function ChecklistPanel({ applicantId }: { applicantId: string }) {
   const t = useTranslations("ApplicantProfile.checklist");
   const queryClient = useQueryClient();
   const { data: items = [], isLoading } = useApplicantChecklists(applicantId);
@@ -74,11 +70,7 @@ export function ChecklistPanel({
       </div>
     );
   if (items.length === 0)
-    return (
-      <p className="py-8 text-center text-sm text-muted-foreground">
-        {t("noItems")}
-      </p>
-    );
+    return <p className="py-8 text-center text-sm text-muted-foreground">{t("noItems")}</p>;
 
   return (
     <div className="space-y-4">
@@ -90,9 +82,7 @@ export function ChecklistPanel({
           </div>
           <Progress value={percentage} className="h-2" />
         </div>
-        <Badge variant="outline">
-          {t("completed", { completed, total: items.length })}
-        </Badge>
+        <Badge variant="outline">{t("completed", { completed, total: items.length })}</Badge>
       </div>
 
       <div className="divide-y rounded-lg border">

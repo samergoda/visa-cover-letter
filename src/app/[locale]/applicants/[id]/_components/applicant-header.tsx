@@ -86,12 +86,7 @@ export function ApplicantHeader({
         </div>
 
         {isEditing ? (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={onEditToggle}
-            disabled={isSaving}
-          >
+          <Button size="sm" variant="outline" onClick={onEditToggle} disabled={isSaving}>
             <X className="mr-1.5 h-4 w-4" /> {t("cancel")}
           </Button>
         ) : (
@@ -109,9 +104,7 @@ export function ApplicantHeader({
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>{t("deleteTitle", { name: applicant.full_name })}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t("deleteDescription")}
-              </AlertDialogDescription>
+              <AlertDialogDescription>{t("deleteDescription")}</AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>

@@ -125,11 +125,7 @@ export async function updateApplicant(
   const supabase = createAdminClient();
 
   // Fetch old data to calculate diffs
-  const { data: oldData } = await supabase
-    .from("applicants")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data: oldData } = await supabase.from("applicants").select("*").eq("id", id).single();
 
   const { data, error } = await supabase
     .from("applicants")
@@ -178,13 +174,9 @@ export async function updateApplicant(
     }
   }
 
-  await logActivity(
-    id,
-    "applicant_updated",
-    `Applicant information was updated`,
-    performedBy,
-    { changes }
-  );
+  await logActivity(id, "applicant_updated", `Applicant information was updated`, performedBy, {
+    changes,
+  });
 
   return applicant;
 }
@@ -233,8 +225,8 @@ export async function bulkUpdateStatus(
         performedBy,
         {
           changes: {
-            "Status": { old: oldStatusName, new: newStatusName }
-          }
+            Status: { old: oldStatusName, new: newStatusName },
+          },
         }
       );
     }
@@ -351,7 +343,7 @@ export async function updateChecklistItem(
     performedBy,
     {
       itemName,
-      isCompleted: updates.is_completed
+      isCompleted: updates.is_completed,
     }
   );
 }
@@ -408,7 +400,7 @@ export async function addNote(
     `A note was added by ${note.author}`,
     performedBy,
     {
-      content: note.content
+      content: note.content,
     }
   );
 
