@@ -29,7 +29,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 Create a detailed day-by-day travel itinerary for a visa application cover letter.
 Applicant Details:
 - Name: ${applicant.full_name}
-- Destination: ${applicant.destination_country}
+- Destination Country: ${applicant.destination_country}
+- Visited City: ${applicant.city || "N/A"}
 - First Entry: ${applicant.entry_country || applicant.destination_country}
 - Travel Dates: ${applicant.arrival_date || "N/A"} to ${applicant.departure_date || "N/A"}
 - Duration of Stay: ${duration} days
@@ -37,8 +38,10 @@ Applicant Details:
 - Accommodation: ${hotelName} (${hotelAddress})
 
 Instructions:
+- The applicant is visiting the specific city: ${applicant.city || "the city determined by their accommodation details or the capital/major city of the destination country"}. Use this city for the entire travel itinerary.
+- All travel activities must be restricted to this single city. The itinerary must NOT include travel to other cities or regions; the entire duration of stay is spent exploring and staying within this one city.
 - Return a list of ${duration} days.
-- For each day, write a realistic, embassy-appropriate travel plan (morning/afternoon/evening activities).
+- For each day, write a realistic, embassy-appropriate travel plan (morning/afternoon/evening activities) occurring strictly within the selected city.
 - Ensure activities match the purpose of travel (e.g. tourism vs. business meetings).
 - You MUST output ONLY a valid JSON array of objects, with no extra text, notes, or explanations before or after.
 - The JSON objects must match this exact structure:

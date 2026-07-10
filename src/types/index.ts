@@ -81,13 +81,13 @@ export const OPENROUTER_MODELS: {
   value: OpenRouterModel;
   label: string;
 }[] = [
-  { value: "deepseek/deepseek-chat-v3", label: "DeepSeek Chat V3 (Default)" },
-  { value: "openai/gpt-4o-mini", label: "GPT-4o Mini" },
+  { value: "openai/gpt-4o-mini", label: "GPT-4o Mini (Default)" },
+  { value: "deepseek/deepseek-chat-v3", label: "DeepSeek Chat V3" },
   { value: "qwen/qwen-3-235b-a22b", label: "Qwen 3 235B" },
   { value: "google/gemini-2.5-flash", label: "Gemini 2.5 Flash" },
 ];
 
-export const DEFAULT_MODEL: OpenRouterModel = "deepseek/deepseek-chat-v3";
+export const DEFAULT_MODEL: OpenRouterModel = "openai/gpt-4o-mini";
 
 export const EMPLOYMENT_TYPES: { value: EmploymentType; label: string }[] = [
   { value: "full-time", label: "Full-time" },

@@ -7,7 +7,7 @@ const intlMiddleware = createMiddleware(routing);
 
 const PUBLIC_PATHS = ["/login", "/api/auth", "/applicants/new", "/api/applicants"];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 1. If it's an API route, static asset, or PWA file, bypass next-intl middleware
