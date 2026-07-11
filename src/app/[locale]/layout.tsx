@@ -20,12 +20,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Visa Cover Letter Generator",
-  description: "Generate professional embassy-ready visa cover letters for your clients using AI.",
+  title: "VisaApp - Application Management System",
+  description: "Visa Application Management System",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Visa Letters",
+    title: "VisaApp",
   },
   formatDetection: {
     telephone: false,
