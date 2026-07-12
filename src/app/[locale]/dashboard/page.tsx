@@ -16,6 +16,7 @@ import {
   Award,
   AlertCircle,
   FileText,
+  RefreshCw,
 } from "lucide-react";
 import { DashboardLayout } from "@/components/layout/dashboard-layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,7 +41,7 @@ import { useDashboard, type DashboardData } from "@/hooks/use-api";
 
 export default function DashboardPage() {
   const t = useTranslations("Dashboard");
-  const { data, isLoading, error } = useDashboard();
+  const { data, isLoading, error, refetch, isRefetching } = useDashboard();
 
   // Helper to extract initials for applicant avatar
   const getInitials = (name: string) => {
@@ -72,15 +73,27 @@ export default function DashboardPage() {
             </h2>
             <p className="text-xs text-muted-foreground">{t("overviewSubtitle")}</p>
           </div>
-          <Button
-            asChild
-            className="shrink-0 shadow-xs hover:shadow-md transition-all duration-300"
-          >
-            <Link href="/applicants/new">
-              <Plus className="h-4 w-4 mr-1.5" />
-              {t("newApplicant")}
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => void refetch()}
+              disabled={isLoading || isRefetching}
+              title="Refresh dashboard"
+              className="bg-card"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
+            </Button>
+            <Button
+              asChild
+              className="shadow-xs hover:shadow-md transition-all duration-300"
+            >
+              <Link href="/applicants/new">
+                <Plus className="h-4 w-4 mr-1.5" />
+                {t("newApplicant")}
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Hero Metrics Cards Grid */}

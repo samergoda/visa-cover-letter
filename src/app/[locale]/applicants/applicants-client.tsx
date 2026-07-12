@@ -87,6 +87,7 @@ export default function ApplicantsClient() {
   const {
     data: applicantsData,
     isLoading,
+    isRefetching,
     refetch: refetchApplicants,
   } = useApplicants({
     search: deferredSearch,
@@ -263,49 +264,51 @@ export default function ApplicantsClient() {
     {
       id: "actions",
       cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="sr-only">{t("actions.label")}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={`/applicants/${row.original.id}`}>
-                <Eye className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" /> {t("actions.viewProfile")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem
-                  onSelect={(e) => e.preventDefault()}
-                  className="text-destructive focus:text-destructive"
-                >
-                  <Trash2 className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" /> {t("actions.delete")}
-                </DropdownMenuItem>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t("actions.deleteTitle")}</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    {t("actions.deleteDescription", { name: row.original.full_name })}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDelete(row.original.id)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+        <div onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">{t("actions.label")}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem asChild>
+                <Link href={`/applicants/${row.original.id}`}>
+                  <Eye className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" /> {t("actions.viewProfile")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <DropdownMenuItem
+                    onSelect={(e) => e.preventDefault()}
+                    className="text-destructive focus:text-destructive"
                   >
-                    {t("delete")}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </DropdownMenuContent>
-        </DropdownMenu>
+                    <Trash2 className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" /> {t("actions.delete")}
+                  </DropdownMenuItem>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t("actions.deleteTitle")}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t("actions.deleteDescription", { name: row.original.full_name })}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => handleDelete(row.original.id)}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      {t("delete")}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       ),
       enableSorting: false,
       size: 50,
@@ -364,8 +367,14 @@ export default function ApplicantsClient() {
             </SelectContent>
           </Select>
 
-          <Button variant="outline" size="icon" onClick={() => refetchApplicants()}>
-            <RefreshCw className="h-4 w-4" />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => void refetchApplicants()}
+            disabled={isLoading || isRefetching}
+            title="Refresh applicants table"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefetching ? "animate-spin" : ""}`} />
           </Button>
 
           <DropdownMenu>
