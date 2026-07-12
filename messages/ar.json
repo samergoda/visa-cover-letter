@@ -199,6 +199,14 @@
       "notes": "ملاحظات الموعد",
       "notesPlaceholder": "أي معلومات إضافية تتعلق بالموعد..."
     },
+    "payment": {
+      "title": "تفاصيل التكلفة والدفع",
+      "totalCost": "التكلفة الإجمالية",
+      "totalCostPlaceholder": "0.00",
+      "amountPaid": "المبلغ المدفوع",
+      "amountPaidPlaceholder": "0.00",
+      "balance": "الرصيد المتبقي"
+    },
     "buttons": {
       "previous": "السابق",
       "next": "الخطوة التالية",

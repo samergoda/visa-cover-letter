@@ -66,6 +66,9 @@ export const applicantFormSchema = z.object({
   // Assignment
   status_id: z.string().optional().or(z.literal("")),
   assigned_employee: z.string().optional(),
+  // Payment tracking
+  total_cost: z.coerce.number().optional().or(z.literal("")),
+  amount_paid: z.coerce.number().optional().or(z.literal("")),
   // Appointment Details
   appointment_date: optionalDate,
   appointment_time: z.string().optional().or(z.literal("")),
@@ -124,6 +127,8 @@ export function applicantToFormValues(
     appointment_time: (applicant.appointment_time as string) ?? "",
     appointment_location: (applicant.appointment_location as string) ?? "",
     appointment_notes: (applicant.appointment_notes as string) ?? "",
+    total_cost: (applicant.total_cost as number) ?? "",
+    amount_paid: (applicant.amount_paid as number) ?? "",
   };
 }
 
@@ -173,4 +178,6 @@ export const defaultApplicantFormValues: ApplicantFormValues = {
   appointment_time: "",
   appointment_location: "",
   appointment_notes: "",
+  total_cost: "",
+  amount_paid: "",
 };

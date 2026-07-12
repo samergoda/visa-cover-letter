@@ -69,6 +69,9 @@ export async function exportApplicantsToExcel(
     { header: "Visa Status", key: "visa_status", width: 20 },
     { header: "Assigned Employee", key: "assigned_employee", width: 20 },
     { header: "Progress %", key: "progress_percentage", width: 12 },
+    { header: "Total Cost", key: "total_cost", width: 15 },
+    { header: "Amount Paid", key: "amount_paid", width: 15 },
+    { header: "Remaining Balance", key: "balance", width: 18 },
     { header: "Created Date", key: "created_at", width: 18 },
     { header: "Last Updated", key: "updated_at", width: 18 },
   ];
@@ -116,6 +119,9 @@ export async function exportApplicantsToExcel(
       visa_status: applicant.visa_status?.name ?? "",
       assigned_employee: applicant.assigned_employee ?? "",
       progress_percentage: applicant.progress_percentage,
+      total_cost: applicant.total_cost ?? 0,
+      amount_paid: applicant.amount_paid ?? 0,
+      balance: (applicant.total_cost ?? 0) - (applicant.amount_paid ?? 0),
       created_at: formatDate(applicant.created_at),
       updated_at: formatDate(applicant.updated_at),
     });

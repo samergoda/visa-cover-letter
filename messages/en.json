@@ -199,6 +199,14 @@
       "notes": "Appointment Notes",
       "notesPlaceholder": "Any additional information regarding the appointment..."
     },
+    "payment": {
+      "title": "Payment & Cost Details",
+      "totalCost": "Total Cost",
+      "totalCostPlaceholder": "0.00",
+      "amountPaid": "Amount Paid",
+      "amountPaidPlaceholder": "0.00",
+      "balance": "Remaining Balance"
+    },
     "buttons": {
       "previous": "Previous",
       "next": "Next Step",

@@ -120,6 +120,13 @@ export function ApplicantForm({
   } = form;
   const maritalStatus = watch("marital_status");
   const isFamilyVisa = watch("is_family_visa");
+  const totalCost = watch("total_cost");
+  const amountPaid = watch("amount_paid");
+
+  const costNum = typeof totalCost === "number" ? totalCost : Number(totalCost) || 0;
+  const paidNum = typeof amountPaid === "number" ? amountPaid : Number(amountPaid) || 0;
+  const balance = costNum - paidNum;
+
   const handleSubmit = async (e: React.FormEvent) => {
     await formHandleSubmit(onSubmit as never)(e);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -584,6 +591,42 @@ export function ApplicantForm({
                   register={register}
                   errors={errors}
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payment & Cost Details */}
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("payment.title")}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2">
+              <Field
+                name="total_cost"
+                label={t("payment.totalCost")}
+                type="number"
+                placeholder={t("payment.totalCostPlaceholder")}
+                register={register}
+                errors={errors}
+              />
+              <Field
+                name="amount_paid"
+                label={t("payment.amountPaid")}
+                type="number"
+                placeholder={t("payment.amountPaidPlaceholder")}
+                register={register}
+                errors={errors}
+              />
+              <div className="sm:col-span-2 flex items-center justify-between p-3 rounded-lg border bg-muted/40">
+                <div className="space-y-0.5">
+                  <span className="text-sm font-medium">{t("payment.balance")}</span>
+                  <p className="text-xs text-muted-foreground">
+                    {t("payment.totalCost")} - {t("payment.amountPaid")}
+                  </p>
+                </div>
+                <div className={`text-lg font-bold tabular-nums ${balance > 0 ? "text-amber-600" : balance < 0 ? "text-emerald-600" : "text-foreground"}`}>
+                  {balance.toFixed(2)}
+                </div>
               </div>
             </CardContent>
           </Card>

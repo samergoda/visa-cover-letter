@@ -200,6 +200,8 @@ export interface Applicant {
   spouse_passport_number: string | null;
   number_of_children: number | null;
   children_info: string | null;
+  total_cost?: number | null;
+  amount_paid?: number | null;
 }
 
 export interface ApplicantDocument {

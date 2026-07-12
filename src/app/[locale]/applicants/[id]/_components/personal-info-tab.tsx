@@ -149,6 +149,47 @@ export function PersonalInfoTab({ applicant }: { applicant: Applicant }) {
           </CardContent>
         </Card>
       )}
+
+      {/* Payment & Cost Details */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{tForm("payment.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+          <InfoRow
+            label={tForm("payment.totalCost")}
+            value={
+              applicant.total_cost !== null && applicant.total_cost !== undefined
+                ? Number(applicant.total_cost).toFixed(2)
+                : "0.00"
+            }
+          />
+          <InfoRow
+            label={tForm("payment.amountPaid")}
+            value={
+              applicant.amount_paid !== null && applicant.amount_paid !== undefined
+                ? Number(applicant.amount_paid).toFixed(2)
+                : "0.00"
+            }
+          />
+          {/* Balance */}
+          {(() => {
+            const cost = Number(applicant.total_cost) || 0;
+            const paid = Number(applicant.amount_paid) || 0;
+            const balance = cost - paid;
+            return (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground">
+                  {tForm("payment.balance")}
+                </span>
+                <span className={`text-sm font-bold tabular-nums ${balance > 0 ? "text-amber-600" : balance < 0 ? "text-emerald-600" : "text-foreground"}`}>
+                  {balance.toFixed(2)}
+                </span>
+              </div>
+            );
+          })()}
+        </CardContent>
+      </Card>
     </div>
   );
 }
